@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#07060f" />
+  <title>SpellsCast — Your Wand</title>
+  <script>
+    // GitHub Pages lets a browser reuse its copy of each file for ten minutes,
+    // and a normal refresh only re-checks the page itself, not the game's
+    // JavaScript. So straight after a fix is pushed, a refresh can still run the
+    // old code. Tagging each module with a token that changes on every load
+    // makes a refresh always run the latest version. It has to be an import map
+    // added before any module loads, so that the files the modules import from
+    // each other are tagged too.
+    (() => {
+      const v = Date.now().toString(36);
+      const files = ["game/engine.js", "game/audio.js", "game/blade.js", "game/spells.js",
+        "game/targets.js", "game/net.js", "game/tilt.js", "firebase-config.js"];
+      const imports = {};
+      for (const f of files) {
+        const url = new URL(f, document.baseURI).href;
+        imports[url] = url + "?v=" + v;
+      }
+      const map = document.createElement("script");
+      map.type = "importmap";
+      map.textContent = JSON.stringify({ imports });
+      document.currentScript.after(map);
+    })();
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --ink: #fff;
+      --dim: rgba(255,255,255,0.5);
+      --accent: #7fdcff;
+      --gold: #ffd873;
+      --good: #39d98a;
+      --bad: #ff5a5a;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    html, body {
+      height: 100%; background: #07060f; color: var(--ink);
+      font-family: var(--font); overflow: hidden; overscroll-behavior: none;
+      touch-action: none; user-select: none; -webkit-user-select: none;
+    }
+    .screen {
+      position: fixed; inset: 0; display: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 18px; padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+      text-align: center;
+    }
+    .screen.on { display: flex; }
+
+    h1 { font-size: 30px; font-weight: 900; letter-spacing: -0.02em; }
+    h1 .g { background: linear-gradient(100deg, #c8a951, #ffe9a8 45%, #9d7bd8);
+      -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .muted { color: var(--dim); font-size: 15px; line-height: 1.5; max-width: 30ch; }
+
+    #playBtn {
+      margin-top: 8px; width: 58vw; max-width: 240px; aspect-ratio: 1; border-radius: 50%;
+      border: 0; background: linear-gradient(150deg, #9d7bd8, #ffd93d);
+      color: #2a1400; font: 900 28px var(--font); cursor: pointer;
+      box-shadow: 0 14px 50px rgba(157,123,216,0.4);
+    }
+    #playBtn:active { transform: scale(0.97); }
+
+    /* ---- controller ---- */
+    #ctrl { justify-content: space-between; gap: 10px; }
+    #ctrlTop { width: 100%; display: flex; align-items: flex-start; justify-content: space-between; }
+    #hudScore .lbl { font-size: 9px; letter-spacing: 0.4em; color: var(--dim); font-weight: 700; }
+    #hudScore .val { font-size: 40px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+    #hudLives { display: flex; gap: 7px; padding-top: 4px; }
+    #hudLives .x {
+      width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+      font-size: 13px; font-weight: 900; background: rgba(255,90,90,0.16);
+      color: var(--bad); border: 2px solid rgba(255,90,90,0.5); transition: opacity .25s;
+    }
+    #hudLives .x.spent { opacity: 0.16; }
+
+    /* the cast pad: hold it, wave the wand, let go */
+    #castWrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    #castMsg { font-size: 19px; font-weight: 900; min-height: 24px; letter-spacing: 0.02em; }
+    #castSub { color: var(--dim); font-size: 13px; min-height: 18px; }
+    #castPad {
+      width: 44vw; max-width: 190px; aspect-ratio: 1; border-radius: 50%;
+      border: 3px solid rgba(255,216,115,0.45);
+      background: radial-gradient(circle at 50% 42%, rgba(255,216,115,0.16), rgba(255,216,115,0.03) 70%);
+      display: grid; place-items: center; gap: 2px; cursor: pointer;
+      transition: transform .1s, box-shadow .18s, border-color .18s;
+      touch-action: none;
+    }
+    #castPad .big { font-size: 18px; font-weight: 900; color: var(--gold); letter-spacing: 0.02em; }
+    #castPad .small { font-size: 10px; color: var(--dim); font-weight: 700; letter-spacing: 0.14em; }
+    #castPad.hot {
+      transform: scale(0.96);
+      border-color: var(--gold);
+      box-shadow: 0 0 0 6px rgba(255,216,115,0.12), 0 0 60px rgba(255,176,46,0.5);
+      background: radial-gradient(circle at 50% 42%, rgba(255,216,115,0.34), rgba(255,176,46,0.08) 70%);
+    }
+
+    /* the runes, always on screen - this is the reference card.
+       Two by two, not four across: at four columns "Levitate" wraps to
+       three lines on a narrow phone and the card stops being glanceable. */
+    #book { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+    #book .s {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 6px 4px; border-radius: 12px; background: rgba(255,255,255,0.045);
+    }
+    #book .s:last-child:nth-child(odd) { grid-column: span 2; max-width: 60%; margin: 0 auto; width: 100%; }
+    #book canvas { width: 100%; height: 30px; display: block; }
+    #book .n { font-size: 10px; font-weight: 800; line-height: 1.15; }
+    #book .m { font-size: 9px; color: var(--dim); font-weight: 600; line-height: 1.2; }
+
+    #modeTag { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; color: var(--accent);
+      border: 1px solid rgba(127,220,255,0.35); border-radius: 999px; padding: 4px 11px; }
+
+    #ctrlBottom { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+    .row { display: flex; gap: 10px; }
+    button.act {
+      flex: 1; font: 700 15px var(--font); padding: 13px 12px; border: 0; border-radius: 13px;
+      background: rgba(255,255,255,0.09); color: var(--ink); cursor: pointer;
+    }
+    button.act:active { background: rgba(255,255,255,0.18); }
+    button.act.primary { background: var(--accent); color: #06222b; }
+
+    #conn { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--dim); font-weight: 600; }
+    #conn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); }
+    #conn.live .dot { background: var(--good); box-shadow: 0 0 10px var(--good); }
+
+    #errText { color: var(--bad); font-size: 16px; font-weight: 700; max-width: 30ch; }
+  </style>
+</head>
+<body>
+  <!-- 1. the gesture screen. iOS will not hand over motion data without it. -->
+  <div class="screen on" id="intro">
+    <h1><span class="g">SpellsCast</span></h1>
+    <p class="muted">Point your phone at the screen like a wand. <b>Hold the cast button</b> and draw the rune the target is wearing.</p>
+    <button id="playBtn">PLAY</button>
+    <p class="muted" id="introNote">room <b id="roomText">—</b></p>
+  </div>
+
+  <!-- 2. the controller -->
+  <div class="screen" id="ctrl">
+    <div id="ctrlTop">
+      <div id="hudScore"><div class="lbl">SCORE</div><div class="val" id="scoreVal">0</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div id="hudLives"></div>
+        <div id="modeTag">TILT</div>
+      </div>
+    </div>
+
+    <div id="castWrap">
+      <div id="castMsg">Ready</div>
+      <div id="castSub">Hold, draw, release.</div>
+      <div id="castPad">
+        <div class="big">HOLD</div>
+        <div class="small">TO CAST</div>
+      </div>
+    </div>
+
+    <div id="book"></div>
+
+    <div id="ctrlBottom">
+      <div class="row">
+        <button class="act" id="centerBtn">Center</button>
+        <button class="act primary" id="againBtn">Play again</button>
+      </div>
+      <div id="conn"><span class="dot"></span><span id="connText">connecting…</span></div>
+    </div>
+  </div>
+
+  <!-- 3. something went wrong -->
+  <div class="screen" id="fail">
+    <div id="errText"></div>
+    <p class="muted">Scan the QR code on the big screen again.</p>
+  </div>
+
+  <script type="module">
+    import { createController } from "./game/net.js";
+    import { createTracker } from "./game/tilt.js";
+    import { SPELLS, drawGlyph } from "./game/spells.js";
+
+    const $ = (id) => document.getElementById(id);
+    const show = (id) => ["intro", "ctrl", "fail"].forEach((s) => $(s).classList.toggle("on", s === id));
+    const fail = (msg) => { $("errText").textContent = msg; show("fail"); };
+
+    const params = new URLSearchParams(location.search);
+    const code = params.get("room");
+    if (!code) fail("No room code in the link.");
+    $("roomText").textContent = code || "—";
+
+    // PenDraw's mapping: alpha -> x, beta -> y, nothing else. See game/tilt.js.
+    const tracker = createTracker();
+    let ctrl = null;
+    let mode = null;            // "tilt" | "touch"
+    let lastStatus = null;
+    let wakeLock = null;
+
+    // The thumb. Everything about casting reduces to this one boolean and the
+    // moments it changes.
+    let casting = false;
+    let lastSample = { x: 0.5, y: 0.5, vx: 0, vy: 0 };
+
+    // PLAY does nothing useful until the room join has landed, and a button that
+    // silently ignores you is worse than one that says it is not ready yet.
+    const playBtn = $("playBtn");
+    playBtn.disabled = true;
+    playBtn.style.filter = "grayscale(0.7)";
+    playBtn.textContent = "…";
+
+    // ---- the spellbook, drawn from the same glyphs the recogniser matches ----
+    // Not a picture of the gestures - THE gestures. If a shape is retuned in
+    // game/spells.js this card retunes with it and cannot go stale.
+    function buildBook() {
+      const box = $("book");
+      box.innerHTML = "";
+      for (const s of SPELLS) {
+        const cell = document.createElement("div");
+        cell.className = "s";
+        const cv = document.createElement("canvas");
+        const name = document.createElement("div");
+        name.className = "n";
+        name.style.color = s.color;
+        name.textContent = s.name;
+        const move = document.createElement("div");
+        move.className = "m";
+        move.textContent = s.move;
+        cell.append(cv, name, move);
+        box.appendChild(cell);
+
+        // Size the backing store to the laid-out box so the rune is crisp.
+        requestAnimationFrame(() => {
+          const dpr = Math.min(devicePixelRatio || 1, 2);
+          const w = cv.clientWidth || 90, h = cv.clientHeight || 34;
+          cv.width = Math.round(w * dpr);
+          cv.height = Math.round(h * dpr);
+          const c = cv.getContext("2d");
+          c.setTransform(dpr, 0, 0, dpr, 0, 0);
+          drawGlyph(c, s, w / 2, h / 2, Math.min(w * 0.6, h * 0.92), 1, 2.2);
+        });
+      }
+    }
+    buildBook();
+
+    // ---- join immediately; the PLAY button only unlocks the sensors ---------
+    try {
+      ctrl = await createController(code, {
+        onHud(hud) {
+          $("scoreVal").textContent = hud.score ?? 0;
+          renderLives(hud.lives ?? 3);
+          if (hud.spell) showCast(hud.spell, hud.castOk, hud.combo);
+        },
+        onStatus(status) {
+          lastStatus = status;
+          paintStatus(status);
+        },
+        onClosed() { fail("The big screen closed the game."); },
+      });
+      setConn(true, "connected to room " + code);
+      playBtn.disabled = false;
+      playBtn.style.filter = "";
+      playBtn.textContent = "PLAY";
+    } catch (e) {
+      fail(e.message);
+    }
+
+    function setConn(on, text) {
+      $("conn").classList.toggle("live", on);
+      $("connText").textContent = text;
+    }
+
+    function renderLives(lives) {
+      const box = $("hudLives");
+      if (box.children.length !== 3) {
+        box.innerHTML = "";
+        for (let i = 0; i < 3; i++) {
+          const d = document.createElement("div");
+          d.className = "x";
+          d.textContent = "✕";
+          box.appendChild(d);
+        }
+      }
+      [...box.children].forEach((el, i) => el.classList.toggle("spent", i >= lives));
+    }
+    renderLives(3);
+
+    // Echo the big screen's verdict on the last cast. You are looking at your
+    // hand as often as at the screen, so the phone has to be able to tell you
+    // whether that one worked.
+    let castMsgTimer = 0;
+    function showCast(name, ok, combo) {
+      const spell = SPELLS.find((s) => s.name === name);
+      $("castMsg").textContent = name;
+      $("castMsg").style.color = ok === false ? "var(--bad)" : (spell?.color || "var(--gold)");
+      $("castSub").textContent = ok === false ? "no target for it" : (combo > 1 ? "combo x" + combo : "hit");
+      clearTimeout(castMsgTimer);
+      castMsgTimer = setTimeout(() => paintStatus(lastStatus), 1600);
+    }
+
+    // Casting a spell is what starts and restarts a run - the button is only a
+    // way out for someone whose gestures are not landing yet, so it is offered
+    // whenever a run is NOT in progress rather than only after a loss.
+    function paintStatus(status) {
+      const over = status === "over";
+      const idle = over || status === "lobby" || status == null;
+      $("againBtn").style.display = idle ? "block" : "none";
+      $("againBtn").textContent = over ? "Play again" : "Start";
+      $("castMsg").style.color = "";
+      if (over) {
+        $("castMsg").textContent = "Wand down";
+        $("castSub").textContent = "Cast any spell to play again.";
+      } else if (status === "playing") {
+        $("castMsg").textContent = "Cast!";
+        $("castSub").textContent = mode === "touch" ? "Drag to draw the rune." : "Hold, draw the rune, release.";
+      } else {
+        $("castMsg").textContent = "Ready";
+        $("castSub").textContent = "Cast any spell to begin.";
+      }
+    }
+    paintStatus(null);
+
+    // ---- the one gesture that unlocks everything ---------------------------
+    playBtn.onclick = async () => {
+      if (!ctrl) return;
+      // The motion-permission prompt has to happen inside this gesture - iOS
+      // will not grant it from any later callback.
+      await enableTilt();
+      show("ctrl");
+      keepAwake();
+      tracker.center();
+      paintStatus(lastStatus);
+      buildBook();     // the cells had no laid-out width until now
+    };
+
+    async function enableTilt() {
+      // iOS 13+ hands out motion only from inside a user gesture, and only over
+      // HTTPS. On http://<lan-ip> no event ever fires, which is exactly what the
+      // touch fallback below is for.
+      try {
+        if (typeof DeviceOrientationEvent !== "undefined" &&
+            typeof DeviceOrientationEvent.requestPermission === "function") {
+          const res = await DeviceOrientationEvent.requestPermission();
+          if (res !== "granted") return useTouch("Motion access denied");
+        }
+        addEventListener("deviceorientation", onOrient);
+        mode = "tilt";
+        // If nothing arrives shortly, this device is not going to send anything.
+        setTimeout(() => { if (mode === "tilt" && !gotOrient) useTouch("No motion sensor here"); }, 1500);
+        // And if plenty arrived but not one of them ever moved, the sensor is
+        // there in name only - a dead wand is worse than an honest fallback.
+        setTimeout(() => {
+          if (mode === "tilt" && orientSamples >= 8 && orientVariation === 0) useTouch("Motion sensor not responding");
+        }, 3000);
+      } catch {
+        useTouch("Motion not available");
+      }
+    }
+
+    let gotOrient = false;
+    // Some devices deliver orientation events that never actually change - a
+    // sensor that is present but dead. Events alone are not proof of a working
+    // gyro, so also watch for the numbers moving: a real sensor always dithers,
+    // and total variation of exactly zero across seconds means nothing is there.
+    let orientSamples = 0, orientVariation = 0, lastRaw = null;
+
+    function onOrient(e) {
+      if (mode !== "tilt") return;
+      // gamma matters as much as alpha here - see game/tilt.js. Feeding only
+      // alpha and beta is what made the wand jump when the phone was upright.
+      const s = tracker.push(e.alpha, e.beta, e.gamma);
+      if (!s) return;
+
+      orientSamples++;
+      const raw = [e.alpha || 0, e.beta || 0, e.gamma || 0];
+      if (lastRaw) orientVariation += raw.reduce((t, v, i) => t + Math.abs(v - lastRaw[i]), 0);
+      lastRaw = raw;
+
+      if (!gotOrient) { gotOrient = true; setConn(true, "wand live"); }
+      lastSample = s;
+      ctrl?.sendBlade({ ...s, cast: casting });
+    }
+
+    // The two edges of a cast must not wait for the next sensor tick. Orientation
+    // events fire at 60Hz on a good phone and far slower on a tired one, and a
+    // release that sits in a queue for 40ms clips the end off the gesture - the
+    // flick at the end of Levitate is exactly the part that gets lost.
+    function pumpCast() {
+      ctrl?.sendBlade({ ...lastSample, cast: casting });
+    }
+
+    // ---- the cast pad -------------------------------------------------------
+    const pad = $("castPad");
+    function beginCast(e) {
+      if (e) { e.preventDefault(); try { pad.setPointerCapture(e.pointerId); } catch {} }
+      if (casting) return;
+      casting = true;
+      pad.classList.add("hot");
+      pumpCast();
+    }
+    function endCast() {
+      if (!casting) return;
+      casting = false;
+      pad.classList.remove("hot");
+      pumpCast();
+    }
+    pad.addEventListener("pointerdown", beginCast);
+    pad.addEventListener("pointerup", endCast);
+    pad.addEventListener("pointercancel", endCast);
+    // A thumb that slides off the pad still means "still casting" - pointer
+    // capture keeps the events coming, but a lost capture must not strand the
+    // stroke open forever, so the window-level release is a backstop.
+    addEventListener("pointerup", endCast);
+    addEventListener("pointercancel", endCast);
+    // Locking the phone mid-cast would otherwise leave a stroke open.
+    document.addEventListener("visibilitychange", () => { if (document.hidden) endCast(); });
+
+    // ---- fallback: drag anywhere on the phone -------------------------------
+    // Also how you test the whole relay from a second desktop tab. Here the drag
+    // IS the stroke: it moves the wand and delimits the cast at the same time,
+    // so the pad is redundant and gets out of the way.
+    function useTouch(why) {
+      if (mode === "touch") return;
+      if (mode === "tilt") removeEventListener("deviceorientation", onOrient);
+      mode = "touch";
+      $("modeTag").textContent = "TOUCH";
+      setConn(true, why + " — drag to cast");
+      pad.querySelector(".big").textContent = "DRAG";
+      pad.querySelector(".small").textContent = "ANYWHERE TO CAST";
+      paintStatus(lastStatus);
+
+      const send = (e) => {
+        const s = tracker.pushPoint(e.clientX / innerWidth, e.clientY / innerHeight);
+        lastSample = s;
+        ctrl?.sendBlade({ ...s, cast: casting });
+      };
+      addEventListener("pointerdown", (e) => {
+        if (e.target.closest("button, input")) return;
+        casting = true;
+        pad.classList.add("hot");
+        send(e);
+      });
+      addEventListener("pointermove", (e) => { if (casting) send(e); });
+      const up = () => { if (casting) { casting = false; pad.classList.remove("hot"); pumpCast(); } };
+      addEventListener("pointerup", up);
+      addEventListener("pointercancel", up);
+    }
+
+    // ---- controls -----------------------------------------------------------
+    // There is no speed slider. The gain is one measured number in game/tilt.js
+    // - high enough to aim with a movement of the forearm, low enough that the
+    // gyro's own noise does not throw the tip around - and a slider only ever
+    // let a player pick a worse one.
+    $("centerBtn").onclick = () => { tracker.center(); ctrl?.sendCmd("center"); };
+    $("againBtn").onclick = () => ctrl?.sendCmd("start");
+    $("againBtn").style.display = "none";
+
+    // Double-tap the top strip recentres — reaching for a button mid-run is
+    // exactly when you do not want to look down. It deliberately does NOT listen
+    // on the cast pad, where every tap is already a cast.
+    let lastTap = 0;
+    $("ctrlTop").addEventListener("pointerdown", () => {
+      const now = Date.now();
+      if (now - lastTap < 320) tracker.center();
+      lastTap = now;
+    });
+
+    // ---- housekeeping -------------------------------------------------------
+    async function keepAwake() {
+      try { wakeLock = await navigator.wakeLock?.request("screen"); } catch {}
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") { keepAwake(); tracker.center(); }
+    });
+    addEventListener("resize", () => buildBook());
+    addEventListener("pagehide", () => ctrl?.destroy());
+  </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "spellscast",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Point your phone like a wand, draw a rune in the air, and cast the spell. Static site, no build step, no server of your own.",
+  "type": "module",
+  "scripts": {
+    "start": "node tools/dev-server.mjs",
+    "tunnel": "npx --yes cloudflared tunnel --url http://localhost:3000 --protocol http2",
+    "tunnel:quic": "npx --yes cloudflared tunnel --url http://localhost:3000",
+    "test": "node tools/tilt-test.mjs && node tools/spell-test.mjs && node tools/engine-test.mjs && node tools/net-test.mjs",
+    "test:tilt": "node tools/tilt-test.mjs",
+    "test:spell": "node tools/spell-test.mjs",
+    "test:engine": "node tools/engine-test.mjs",
+    "test:net": "node tools/net-test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
