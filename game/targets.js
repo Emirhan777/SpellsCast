@@ -201,7 +201,7 @@ export const TARGETS = [
   {
     id: "wisp",
     spell: "banish",
-    label: "Wisp",
+    label: "Ghost",
     radius: 1.12,
     weight: 0.9,
     // It glides rather than falls, and drifts as it comes.
@@ -209,34 +209,60 @@ export const TARGETS = [
     sway: 0.07,
     aura: "#cfe4ff",
     draw(ctx, r) {
-      // A luminous woodland wisp: a floating core with curling light trails.
-      const glow = ctx.createRadialGradient(0, 0, r * 0.05, 0, 0, r);
-      glow.addColorStop(0, "rgba(235,255,255,0.95)");
-      glow.addColorStop(0.3, "rgba(120,220,255,0.8)");
-      glow.addColorStop(1, "rgba(95,145,255,0)");
+      // A translucent sheet ghost with a rounded head and a floating hem.
+      const glow = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, r * 1.2);
+      glow.addColorStop(0, "rgba(170,215,255,0.24)");
+      glow.addColorStop(1, "rgba(130,190,255,0)");
       ctx.fillStyle = glow;
       ctx.beginPath();
-      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.arc(0, 0, r * 1.2, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = "rgba(140,210,255,0.65)";
-      ctx.lineWidth = r * 0.075;
+
+      const sheet = ctx.createLinearGradient(0, -r * 0.9, 0, r);
+      sheet.addColorStop(0, "rgba(249,253,255,0.97)");
+      sheet.addColorStop(0.55, "rgba(213,233,255,0.86)");
+      sheet.addColorStop(1, "rgba(153,192,235,0.3)");
+      ctx.fillStyle = sheet;
+      ctx.strokeStyle = "rgba(221,241,255,0.65)";
+      ctx.lineWidth = r * 0.025;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.56, -r * 0.28);
+      ctx.bezierCurveTo(-r * 0.6, -r * 1.05, r * 0.6, -r * 1.05, r * 0.56, -r * 0.28);
+      // Reaching sleeves curl into the sides of the sheet.
+      ctx.quadraticCurveTo(r * 0.66, -r * 0.06, r * 0.98, r * 0.14);
+      ctx.quadraticCurveTo(r * 1.02, r * 0.37, r * 0.59, r * 0.21);
+      ctx.quadraticCurveTo(r * 0.59, r * 0.57, r * 0.76, r * 0.92);
+      ctx.quadraticCurveTo(r * 0.47, r * 0.68, r * 0.28, r * 1.02);
+      ctx.quadraticCurveTo(r * 0.07, r * 0.67, -r * 0.14, r * 1.02);
+      ctx.quadraticCurveTo(-r * 0.39, r * 0.67, -r * 0.72, r * 0.92);
+      ctx.quadraticCurveTo(-r * 0.55, r * 0.54, -r * 0.59, r * 0.21);
+      ctx.quadraticCurveTo(-r * 1.02, r * 0.37, -r * 0.98, r * 0.14);
+      ctx.quadraticCurveTo(-r * 0.66, -r * 0.06, -r * 0.56, -r * 0.28);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Soft folds keep the pale body readable against its own halo.
+      ctx.strokeStyle = "rgba(105,145,195,0.2)";
+      ctx.lineWidth = r * 0.045;
       ctx.lineCap = "round";
       for (const side of [-1, 1]) {
         ctx.beginPath();
-        ctx.moveTo(side * r * 0.25, r * 0.18);
-        ctx.bezierCurveTo(side * r, r * 0.4, -side * r * 0.65, r * 0.9, side * r * 0.25, r * 1.15);
+        ctx.moveTo(side * r * 0.32, r * 0.19);
+        ctx.quadraticCurveTo(side * r * 0.25, r * 0.45, side * r * 0.4, r * 0.72);
         ctx.stroke();
       }
-      ctx.fillStyle = "#ddfaff";
-      ctx.beginPath();
-      ctx.ellipse(0, -r * 0.08, r * 0.36, r * 0.43, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#315376";
+
+      // Hollow eyes and an open "boo" mouth read clearly even at game size.
+      ctx.fillStyle = "#20283f";
       for (const side of [-1, 1]) {
         ctx.beginPath();
-        ctx.ellipse(side * r * 0.13, -r * 0.11, r * 0.045, r * 0.08, 0, 0, Math.PI * 2);
+        ctx.ellipse(side * r * 0.2, -r * 0.31, r * 0.105, r * 0.155, side * 0.14, 0, Math.PI * 2);
         ctx.fill();
       }
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.04, r * 0.09, r * 0.14, 0, 0, Math.PI * 2);
+      ctx.fill();
     },
   },
 
@@ -370,7 +396,7 @@ export function drawTarget(ctx, kind, x, y, r, rot, opts = {}) {
 //
 // Every target dies differently, and the difference is the reward. A feather
 // that simply vanished would make the Levitation Charm feel identical to the
-// Killing Curse, which is the opposite of the point.
+// Shattering Spell, which is the opposite of the point.
 // ---------------------------------------------------------------------------
 export const DEFEATS = {
   // Disarmed: the wand spins away, the figure is flung back.

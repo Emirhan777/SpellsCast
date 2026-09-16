@@ -22,11 +22,11 @@ Things fly in wearing the rune of the spell that stops them. Draw it.
 |-------|------|-------|--|
 | **Expel** | Drive down and snap back up — a narrow **V** | Rogue Mages | their wand spins away |
 | **Levitate** | Swish across, then flick straight up | Feathers | they drift up and out |
-| **Banish** | Sweep a full **circle** | Wisps | they recoil and flee |
+| **Banish** | Sweep a full **circle** | Ghosts | they recoil and flee |
 | **Shatter** | Tear a lightning **zigzag** | Serpents | they come apart |
 
 A feather falls at less than half gravity and drifts sideways the whole way down,
-so the Levitation Charm gets the gentlest target on the board. A glowing wisp glides.
+so the Levitation Charm gets the gentlest target on the board. A translucent ghost glides.
 A Rogue Mage and a serpent drop like anything else.
 
 Draw the wrong rune and the target shrugs it off. Let one fall off the bottom and
