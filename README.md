@@ -14,6 +14,18 @@ No app to install, no account, no name to type. Scan and cast.
  📱 play.html (phone, points + casts) ──wand coords + thumb──▶ 🔥 Firebase RTDB ◀──listen── 🖥️ index.html (big screen)
 ```
 
+## iPhone app
+
+The native Expo controller lives in [`mobile/`](mobile/README.md). It scans the
+same game QR, supports motion and touch casting, and includes offline spell
+practice. From `mobile/`, run `npm install` then `npx expo start --go --tunnel`
+to display the Expo Go preview QR. Scan that to open the app, then use the
+app's scanner to scan the separate game QR on your big screen.
+
+[App help](https://emirhan777.github.io/SpellsCast/support.html) ·
+[Privacy](https://emirhan777.github.io/SpellsCast/privacy.html) ·
+[App Store release preparation](mobile/APP-STORE.md)
+
 ## The spells
 
 Things fly in wearing the rune of the spell that stops them. Draw it.

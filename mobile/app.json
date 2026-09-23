@@ -1,0 +1,73 @@
+{
+  "expo": {
+    "name": "SpellsCast",
+    "slug": "spellscast",
+    "version": "1.0.0",
+    "scheme": "spellscast",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.emirhan777.spellscast",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Scan the QR code on your SpellsCast game screen to connect your wand.",
+        "NSMotionUsageDescription": "Use your phone movement to aim your wand and draw spells.",
+        "UIRequiresFullScreen": true
+      }
+    },
+    "android": {
+      "package": "com.emirhan777.spellscast",
+      "permissions": [
+        "CAMERA",
+        "android.permission.CAMERA"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#100c20"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Scan the QR code on your SpellsCast game screen to connect your wand.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Use your phone movement to aim your wand and draw spells."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#100c20"
+        }
+      ]
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "db7f024b-30bd-41b9-84fe-daa0b6349c86"
+      }
+    },
+    "owner": "emirhansimsek_lightning"
+  }
+}

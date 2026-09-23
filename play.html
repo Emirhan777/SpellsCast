@@ -138,6 +138,7 @@
     <p class="muted">Point your phone at the screen like a wand. <b>Hold the cast button</b> and draw the rune the target is wearing.</p>
     <button id="playBtn">PLAY</button>
     <p class="muted" id="introNote">room <b id="roomText">—</b></p>
+    <a id="nativeAppLink" hidden style="color:#bfa6e6;font-size:13px">Have the iOS app? Open in SpellsCast</a>
   </div>
 
   <!-- 2. the controller -->
@@ -261,6 +262,13 @@
       playBtn.disabled = false;
       playBtn.style.filter = "";
       playBtn.textContent = "PLAY";
+      const nativeLink = $("nativeAppLink");
+      nativeLink.href = "spellscast://join?room=" + encodeURIComponent(code);
+      nativeLink.hidden = false;
+      nativeLink.onclick = () => {
+        ctrl?.destroy(); ctrl = null;
+        playBtn.textContent = "Reconnect in browser";
+      };
     } catch (e) {
       fail(e.message);
     }
@@ -322,7 +330,7 @@
 
     // ---- the one gesture that unlocks everything ---------------------------
     playBtn.onclick = async () => {
-      if (!ctrl) return;
+      if (!ctrl) { location.reload(); return; }
       // The motion-permission prompt has to happen inside this gesture - iOS
       // will not grant it from any later callback.
       await enableTilt();

@@ -118,7 +118,9 @@ export function createBlade(slot = 0, tuning = {}) {
     feed({ x, y, vx = 0, vy = 0, cast = false }) {
       target = { x, y, vx, vy };
       lastSampleAt = performance.now();
-      if (!seen) { seen = true; pos = { x, y }; inkPos = { x, y }; prev = { x, y }; }
+      // A finger can start anywhere on the touch pad. Begin at the actual
+      // press position, without drawing a line from the previous wand tip.
+      if (!seen || (cast && !casting)) { seen = true; pos = { x, y }; inkPos = { x, y }; prev = { x, y }; }
       setCasting(!!cast);
     },
 
@@ -128,7 +130,7 @@ export function createBlade(slot = 0, tuning = {}) {
     feedDirect(x, y, cast = false) {
       target = { x, y, vx: 0, vy: 0 };
       lastSampleAt = performance.now();
-      if (!seen) { seen = true; pos = { x, y }; inkPos = { x, y }; prev = { x, y }; }
+      if (!seen || (cast && !casting)) { seen = true; pos = { x, y }; inkPos = { x, y }; prev = { x, y }; }
       setCasting(!!cast);
     },
 
