@@ -11,6 +11,6 @@ Six unedited screenshots from the standalone iOS Release simulator app are in [s
 
 [Native app build](https://expo.dev/accounts/emirhansimsek_lightning/projects/spellscast/builds/abe0ac39-77f0-4383-86bb-679c29809f7e) compiled and passed screenshot navigation; its final artifact collection failed because of a directory path. [Successful capture job](https://expo.dev/accounts/emirhansimsek_lightning/projects/spellscast/builds/477498db-75ff-4e55-95d6-933f9221d31f) reused that compiled app and collected all six images. The artifact path is corrected in the build configuration.
 
-These files are ready for the 6.9-inch iPhone screenshot slot in App Store Connect. They have not been uploaded. This simulator build does not replace the signed production build required for submission.
+All six files were uploaded and processed successfully in the 6.9-inch iPhone screenshot slot in App Store Connect on September 23, 2026. Store order is home, Expel practice, start a game, join a game, Levitate practice, Banish practice. The signed production version 1.0.0 build 3 has also been uploaded and attached to the store version; App Review submission is still pending.
 
 See [APP-STORE.md](../APP-STORE.md) for the listing, build and submission steps.

@@ -1,10 +1,19 @@
 # App Store release preparation
 
+## Current release status (September 23, 2026)
+
+- App Store Connect record: [SpellsCast, Apple ID 6815057736](https://appstoreconnect.apple.com/apps/6815057736/distribution/ios/version/inflight).
+- Production version **1.0.0 (3)** is uploaded, processed successfully by Apple, and attached to the version. [EAS production build](https://expo.dev/accounts/emirhansimsek_lightning/projects/spellscast/builds/ab384532-0004-41ba-a36e-7e4b76426bbb).
+- The English listing, exact promotional text, six native screenshots, review instructions, categories, content rights and age-rating questionnaire are saved. The primary calculated age rating is **13+**, with regional variations.
+- App Privacy responses are published: Gameplay Content for app functionality, not linked to identity; Other Diagnostic Data for app functionality, linked to identity because Firebase retains technical connection information including IP addresses. Neither is used for tracking. See [Firebase's retention information](https://firebase.google.com/support/privacy) and [Apple's disclosure definitions](https://developer.apple.com/app-store/app-privacy-details/).
+- Availability is configured for 173 countries or regions. China mainland and Vietnam are excluded pending their game licensing requirements. Apple silicon Mac and Vision Pro distribution are disabled for this phone-controller release.
+- Automatic release after Apple approval is selected. **The app is still in Prepare for Submission; it has not been submitted for review or published.** The launch price and complete private App Review contact (including a phone number with country code) remain required.
+
 ## Release assets
 
 The version 1.0.0 listing is prepared in `store.config.json`. The promotional text is exactly **Turn your phone to a magic wand**. `store-review-notes.txt` explains the companion-screen requirement and offline review mode.
 
-Six verified native iPhone screenshots are available in [store-assets/screenshots/en-US/6.9-inch](store-assets/screenshots/en-US/6.9-inch/). They are 1320 x 2868 RGB PNGs captured from the standalone Release app on an iPhone 17 Pro Max simulator. [Capture details](store-assets/README.md) record the source builds. The screenshots and listing have not yet been uploaded to App Store Connect.
+Six verified native iPhone screenshots are available in [store-assets/screenshots/en-US/6.9-inch](store-assets/screenshots/en-US/6.9-inch/). They are 1320 x 2868 RGB PNGs captured from the standalone Release app on an iPhone 17 Pro Max simulator. [Capture details](store-assets/README.md) record the source builds. All six screenshots are uploaded and processed in App Store Connect.
 
 `store.config.js` merges optional review contact details from the ignored `store.local.json` file. Keep the review phone number, email and any Apple credentials out of the public repository. After Apple authentication is configured, upload metadata from this directory with:
 
@@ -41,7 +50,7 @@ npx eas-cli@latest submit --platform ios --profile production
 
 Run commands from `mobile/`. EAS can build iOS from Windows. Let EAS manage signing, or provide your team's credentials when prompted. The bundle identifier is `com.emirhansimsek.spellscast`; confirm ownership before your first App Store Connect app record. The production profile increments build numbers automatically.
 
-Submitting a build uploads it; completing metadata and requesting Apple review are separate App Store Connect steps. No signed binary has been built or submitted as part of this source implementation.
+Submitting a build uploads it; completing metadata and requesting Apple review are separate App Store Connect steps. Production build 3 has completed the upload and processing steps; see the current release status above.
 
 ## Suggested store listing
 
