@@ -17,7 +17,7 @@ npx eas-cli@latest build --platform ios --profile production
 npx eas-cli@latest submit --platform ios --profile production
 ```
 
-Run commands from `mobile/`. EAS can build iOS from Windows. Let EAS manage signing, or provide your team's credentials when prompted. The bundle identifier is `com.emirhan777.spellscast`; confirm ownership before your first App Store Connect app record. The production profile increments build numbers automatically.
+Run commands from `mobile/`. EAS can build iOS from Windows. Let EAS manage signing, or provide your team's credentials when prompted. The bundle identifier is `com.emirhansimsek.spellscast`; confirm ownership before your first App Store Connect app record. The production profile increments build numbers automatically.
 
 Submitting a build uploads it; completing metadata and requesting Apple review are separate App Store Connect steps. No signed binary has been built or submitted as part of this source implementation.
 

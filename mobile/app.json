@@ -9,7 +9,7 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.emirhan777.spellscast",
+      "bundleIdentifier": "com.emirhansimsek.spellscast",
       "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,

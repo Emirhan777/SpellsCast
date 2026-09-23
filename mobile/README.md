@@ -77,7 +77,7 @@ Metro watches the parent directory to share the game code and Firebase configura
 
 See [APP-STORE.md](APP-STORE.md) for signing, TestFlight, store metadata, review instructions, and remaining device checks.
 
-App identity: `com.emirhan777.spellscast` (change before the first store submission if needed).
+App identity: `com.emirhansimsek.spellscast` (change before the first store submission if needed).
 EAS project: https://expo.dev/accounts/emirhansimsek_lightning/projects/spellscast
 
 No Apple signing credentials are stored in this repository.
