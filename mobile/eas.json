@@ -13,9 +13,26 @@
     },
     "production": {
       "autoIncrement": true
+    },
+    "screenshots-reuse": {
+      "extends": "screenshots",
+      "config": "screenshots-reuse.yml"
+    },
+    "screenshots": {
+      "withoutCredentials": true,
+      "distribution": "internal",
+      "config": "screenshots.yml",
+      "ios": {
+        "simulator": true,
+        "image": "latest"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "metadataPath": "./store.config.js"
+      }
+    }
   }
 }

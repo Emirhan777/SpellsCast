@@ -1,0 +1,31 @@
+appId: com.emirhansimsek.spellscast
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: start-game-button
+    timeout: 60000
+- takeScreenshot: 01-home
+- tapOn:
+    id: start-game-button
+- assertVisible: Send to a computer
+- takeScreenshot: 02-start-a-game
+- tapOn: Back
+- tapOn:
+    id: join-game-button
+- scrollUntilVisible:
+    element:
+      id: scan-button
+    direction: DOWN
+- takeScreenshot: 03-join-a-game
+- launchApp:
+    clearState: true
+- tapOn:
+    id: practice-button
+- assertVisible: SPELL PRACTICE
+- takeScreenshot: 04-practice-expel
+- tapOn: 'Levitate:.*'
+- takeScreenshot: 05-practice-levitate
+- tapOn: 'Banish:.*'
+- takeScreenshot: 06-practice-banish

@@ -1,0 +1,16 @@
+SpellsCast is a native iPhone controller for a companion browser game. It also includes standalone offline rune practice. No login, purchase, subscription, or account is required in the app.
+
+To review connected play:
+1. On a separate computer, open https://emirhan777.github.io/SpellsCast/ and leave it open. Click the page once to enable audio.
+2. On the iPhone, choose Join an existing game, then Scan the game QR. Allow camera access and scan the code shown by the computer. Alternatively, enter the six-digit room code shown on the computer.
+3. Choose Use motion wand and allow motion access, or choose Use touch controls.
+4. Tap Start game. Hold the cast pad, move the phone through a rune, and release. In touch mode, draw the rune on the pad and lift your finger.
+5. The score and lives appear on the phone. Two phones can join one room.
+
+To review starting from the app:
+Choose Start a game, then Create a game link. Send or copy the link to your computer. Open it on the computer and select Open game on this screen. Return to the iPhone app; it pairs automatically. Choose a control mode and tap Start game. An unused link expires after ten minutes.
+
+To review without another device, camera, or motion access:
+Choose Practice your spells. Draw each displayed rune with your finger. Tap another spell to change the guide. This mode works offline.
+
+The camera is used only to scan the room QR and does not save or upload images. Motion controls convert orientation to wand coordinates. Sound plays on the computer or TV game screen. A TV must have a compatible browser, or display a computer via HDMI or Mac AirPlay. Standard iPhone mirroring displays the phone controller.

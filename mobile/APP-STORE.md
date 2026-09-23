@@ -1,5 +1,27 @@
 # App Store release preparation
 
+## Release assets
+
+The version 1.0.0 listing is prepared in `store.config.json`. The promotional text is exactly **Turn your phone to a magic wand**. `store-review-notes.txt` explains the companion-screen requirement and offline review mode.
+
+Six verified native iPhone screenshots are available in [store-assets/screenshots/en-US/6.9-inch](store-assets/screenshots/en-US/6.9-inch/). They are 1320 x 2868 RGB PNGs captured from the standalone Release app on an iPhone 17 Pro Max simulator. [Capture details](store-assets/README.md) record the source builds. The screenshots and listing have not yet been uploaded to App Store Connect.
+
+`store.config.js` merges optional review contact details from the ignored `store.local.json` file. Keep the review phone number, email and any Apple credentials out of the public repository. After Apple authentication is configured, upload metadata from this directory with:
+
+```powershell
+npx eas-cli@latest metadata:push --profile production
+```
+
+Real iOS screenshots are generated with a Release simulator build and Maestro, without altering the app's UI:
+
+```powershell
+npx eas-cli@latest build --platform ios --profile screenshots
+```
+
+The job selects an available iPhone Pro Max simulator, sets the status bar to 9:41, and captures the home, game setup, joining, and spell-practice screens. Download the build-artifact archive from the build page. Inspect every screenshot and verify its dimensions before uploading to App Store Connect. `screenshots-reuse` can repeat capture using an existing simulator application archive supplied as `SCREENSHOT_APP_ARCHIVE_URL` in that build's environment.
+
+Prepared metadata is not confirmation of submission. Apple authentication, a signed production build, the App Review contact, pricing/availability, current age-rating questions and App Privacy declarations must be completed in the actual App Store Connect record before review can be submitted.
+
 ## Build and signing
 
 The app is linked to `@emirhansimsek_lightning/spellscast`. EAS profiles are configured in `eas.json`.
@@ -25,6 +47,7 @@ Submitting a build uploads it; completing metadata and requesting Apple review a
 
 - **Name:** SpellsCast
 - **Subtitle:** Your phone becomes a wand
+- **Promotional text:** Turn your phone to a magic wand
 - **Primary category:** Games
 - **Secondary category:** Entertainment
 - **Support URL:** https://emirhan777.github.io/SpellsCast/support.html
