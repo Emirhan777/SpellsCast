@@ -37,6 +37,7 @@ export async function joinRoom(code: string, callbacks: Callbacks, signal: Abort
     const room = snapshot.val();
     if (!room?.createdAt) throw new Error('That room has closed. Scan the screen again.');
     if (room.game !== GAME_ID) throw new Error('That room belongs to a different game.');
+    if (room.status === 'waiting-screen') throw new Error('Open the shared link on your big screen first.');
     await Promise.all(disconnects.map(handle => handle.remove()));
     active();
     const result = await runTransaction(ref(db, base + '/players'), players => {

@@ -15,12 +15,25 @@ npx expo start --go --tunnel
 2. Sign in to Expo Go with the same Expo account used by the CLI (`npx expo whoami`).
 3. Scan the **terminal QR** with the iPhone Camera to open SpellsCast in Expo Go.
 4. Open the browser game on a **different screen**.
-5. Inside SpellsCast, tap **Scan the game QR** and scan that screen's QR. Or enter the six-digit room code.
+5. Inside SpellsCast, choose **Join an existing game**, then **Scan the game QR** and scan that screen's QR. Or enter the six-digit room code.
 6. Choose motion or touch controls. Hold the cast pad, draw a rune, and release.
 
 The Expo QR opens the app. The game QR pairs your wand. The tunnel URL is temporary and works only while Metro is running. `npx expo start --go --lan` is an alternative when the phone and computer share a reachable Wi-Fi network.
 
 Sound and music play on the big screen. Click the big screen once to enable its audio.
+
+## Start a game from the app
+
+Choose **Start a game** on the home screen:
+
+- **Create a game link**, then **Send game link** opens the iOS share sheet for Messages, Mail, AirDrop to a Mac, and other installed sharing apps. **Copy game link** is also available.
+- Open that link on a computer or TV and select **Open game on this screen**. Return to the iPhone app; it pairs automatically and offers motion or touch controls. Tap **Start game** after choosing controls.
+- **Copy website address** and **Share website address** send the ordinary game homepage. Open it on the other screen, then choose **The game is open — join it** for QR/code pairing.
+- Expand the TV browser, computer-to-TV HDMI, or Mac AirPlay guides for device-specific steps. The current website address is displayed; no custom short domain is configured.
+
+The automatic link is valid for ten minutes and one screen. Going back or replacing it cancels an unused link; cancelling after a screen claims it does not delete the running game. Returning from the share sheet resumes pairing. Links that have expired or already been used cannot open a second host.
+
+Pending links reserve a room with `status: waiting-screen` and an expiring launch token. The screen claims it atomically, then takes over normal room cleanup. The app removes unused reservations on cancellation or expiry while running; an abrupt app termination can leave an expired reservation in the database. Expiry prevents its use but does not provide server-side garbage collection. Launch tokens distinguish handoffs within the existing anonymous room relay; they are not an authentication boundary.
 
 ## Included
 

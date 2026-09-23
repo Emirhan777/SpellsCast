@@ -27,9 +27,10 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getDatabase, ref, get, set, remove, onValue, onChildAdded, onChildChanged,
-  onChildRemoved, onDisconnect, serverTimestamp,
+  onChildRemoved, onDisconnect, serverTimestamp, runTransaction,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "../firebase-config.js";
+import { claimLaunch } from "./launch.js";
 
 const db = getDatabase(getApps().length ? getApp() : initializeApp(firebaseConfig));
 
@@ -67,11 +68,19 @@ async function freeCode() {
 // ---------------------------------------------------------------------------
 // HOST - the big screen. Owns the room and the game state.
 // ---------------------------------------------------------------------------
-export async function createHost({ onJoin, onLeave, onBlade, onCmd } = {}) {
-  const code = await freeCode();
+export async function createHost({ onJoin, onLeave, onBlade, onCmd, launch } = {}) {
+  if (launch && (!/^\d{6}$/.test(launch.code) || !/^[a-f0-9]{32}$/.test(launch.token))) throw new Error('Invalid game link. Create a new one in the app.');
+  const code = launch ? launch.code : await freeCode();
   const base = "rooms/" + code;
   const room = ref(db, base);
-  await set(room, { game: GAME_ID, status: "lobby", createdAt: serverTimestamp() });
+  if (launch) {
+    // A null local cache is not proof the room is absent. Propose a no-op
+    // deletion so Firebase checks the server and retries with its real value.
+    const result = await runTransaction(room, value => value === null ? null : claimLaunch(value, launch.token), { applyLocally: false });
+    if (!result.committed || !result.snapshot.exists()) throw new Error('This link expired, was cancelled, or is already open on another screen. Create a new link in the app.');
+  } else {
+    await set(room, { game: GAME_ID, status: "lobby", createdAt: serverTimestamp() });
+  }
   // Self-deleting room: when this tab closes, refreshes or drops its connection,
   // Firebase removes the whole thing. Abandoned rooms never accumulate.
   onDisconnect(room).remove();
@@ -153,6 +162,7 @@ export async function createController(code, { onHud, onStatus, onClosed } = {})
   if (!snap.exists()) throw new Error("That game is over. Scan the QR on the screen again.");
   const room = snap.val();
   if (room.game && room.game !== GAME_ID) throw new Error("That code belongs to a different game.");
+  if (room.status === 'waiting-screen') throw new Error('Open the shared link on your big screen first.');
 
   // Claim the lowest free slot. Slot decides the blade colour on the big screen.
   const taken = new Set(Object.values(room.players || {}).map((p) => p?.slot));

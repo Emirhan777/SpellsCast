@@ -12,9 +12,10 @@ import { SPELLS, recognize } from '../../game/spells';
 import { joinRoom, type Controller } from './controller';
 import { GAME_URL, parseRoom, type Hud, type Point } from './protocol';
 import { useWand } from './useWand';
+import StartGame from './StartGame';
 
 const GOLD = '#eed297', DIM = '#a79eb8';
-type Phase = 'home' | 'joining' | 'ready' | 'playing' | 'practice';
+type Phase = 'home' | 'start' | 'joining' | 'ready' | 'playing' | 'practice';
 type Spell = typeof SPELLS[number];
 const haptic = () => { void Haptics.selectionAsync().catch(() => {}); };
 
@@ -52,6 +53,7 @@ export default function SpellsCast() {
   const params = useLocalSearchParams<{ room?: string }>();
   const [phase, setPhase] = useState<Phase>('home');
   const [code, setCode] = useState('');
+  const [showJoin, setShowJoin] = useState(false);
   const [error, setError] = useState('');
   const [scanner, setScanner] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
@@ -234,9 +236,15 @@ export default function SpellsCast() {
       <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       {!active ? <ScrollView contentContainerStyle={styles.home} keyboardShouldPersistTaps="handled">
         <View style={styles.wordmark}><Text style={styles.eyebrow}>SPELLSCAST</Text><Text style={styles.small}>YOUR POCKET WAND</Text></View>
-        <View style={styles.hero}><Wand /><Text style={styles.title}>A little motion.{ '\n' }A little magic.</Text>
-          <Text style={styles.description}>Your iPhone is the wand.{ '\n' }The big screen is your spellbook come alive.</Text></View>
+        {phase !== 'start' && <View style={styles.hero}><Wand /><Text style={styles.title}>A little motion.{ '\n' }A little magic.</Text>
+          <Text style={styles.description}>Your iPhone is the wand.{ '\n' }The big screen is your spellbook come alive.</Text></View>}
+        {phase === 'start' && <StartGame foreground={foreground} onConnect={connect} onBack={() => setPhase('home')} onJoin={() => { setShowJoin(true); setPhase('home'); }} />}
         {phase === 'home' && <>
+          <Button title="Start a game" testID="start-game-button" onPress={() => { setError(''); setPhase('start'); }} />
+          <Text style={styles.instructions}>Send the game to a computer or set it up on your TV.</Text>
+          <Button title="Join an existing game" secondary testID="join-game-button" onPress={() => setShowJoin(!showJoin)} />
+          {showJoin && <View style={styles.card}>
+          <Text accessibilityRole="header" style={styles.cardTitle}>Join an existing game</Text>
           <Button title="Scan the game QR" testID="scan-button" onPress={() => { void openScanner(); }} />
           <Text style={styles.instructions}>Open SpellsCast on a computer or TV, then scan its QR here.</Text>
           <View style={styles.divider}><View style={styles.rule} /><Text style={styles.small}>OR ENTER THE ROOM CODE</Text><View style={styles.rule} /></View>
@@ -244,8 +252,9 @@ export default function SpellsCast() {
             placeholder="000000" placeholderTextColor="#665b78" keyboardType="number-pad" maxLength={6} style={styles.codeInput} returnKeyType="go"
             onSubmitEditing={() => { if (/^\d{6}$/.test(code)) void connect(code); }} />
             <View style={{ flex: 1 }}><Button title="Connect" testID="connect-button" disabled={!/^\d{6}$/.test(code)} onPress={() => { void connect(code); }} /></View></View>
-          {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
           {permission && !permission.granted && !permission.canAskAgain && <Button title="Open camera settings" secondary onPress={() => { void Linking.openSettings(); }} />}
+          </View>}
+          {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
           <Button title="Practice your spells" secondary testID="practice-button" onPress={practice} />
           <Text style={styles.instructions}>No screen nearby? Learn all four runes offline.</Text>
         </>}

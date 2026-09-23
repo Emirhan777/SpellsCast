@@ -15,7 +15,7 @@
     (() => {
       const v = Date.now().toString(36);
       const files = ["game/engine.js", "game/audio.js", "game/music.js", "game/blade.js", "game/spells.js",
-        "game/targets.js", "game/net.js", "game/tilt.js", "firebase-config.js"];
+        "game/targets.js", "game/net.js", "game/launch.js", "game/tilt.js", "firebase-config.js"];
       const imports = {};
       for (const f of files) {
         const url = new URL(f, document.baseURI).href;
@@ -136,10 +136,22 @@
     #musicVolume { width: 100%; accent-color: #e6c876; }
     #musicMood, #musicStatus { color: #c9bfdc; font-size: 12px; }
     .musicBody a { color: #9ddfff; }
+    #launchScreen { position: fixed; inset: 0; z-index: 30; background: #100c20;
+      color: #fff; padding: 32px; display: none; place-content: center; text-align: center; gap: 22px; }
+    #launchScreen h1 { color: #eed297; font-size: clamp(30px, 5vw, 56px); }
+    #launchScreen p { max-width: 540px; line-height: 1.6; color: #c9bfd5; margin: auto; }
+    #launchScreen button { padding: 18px 28px; border: 0; border-radius: 16px; background: #eed297;
+      color: #281b31; font: 800 20px var(--font); cursor: pointer; }
   </style>
 </head>
 <body>
   <canvas id="stage"></canvas>
+  <section id="launchScreen" aria-labelledby="launchTitle">
+    <h1 id="launchTitle">Your big screen awaits.</h1>
+    <p>Open this page on the computer or TV you want to play on. Keep SpellsCast open on your iPhone; it will connect automatically.</p>
+    <button id="launchConfirm">Open game on this screen</button>
+    <p>This link works once. To use another screen, create a new link in the app.</p>
+  </section>
 
   <div id="scoreBox" class="ov" style="display:none">
     <div class="lbl">SCORE</div>
@@ -205,6 +217,7 @@
     import { createGame } from "./game/engine.js";
     import { createHost } from "./game/net.js";
     import { MUSIC_TRACKS } from "./game/music.js";
+    import { parseLaunch } from "./game/launch.js";
 
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -378,7 +391,16 @@
     }
 
     try {
+      const launch = parseLaunch(location.hash);
+      if (location.hash.startsWith('#launch=') && !launch) throw new Error('Invalid game link. Create a new link in the SpellsCast app.');
+      if (launch) {
+        $("launchScreen").style.display = 'grid';
+        await new Promise(resolve => { $("launchConfirm").onclick = resolve; });
+        $("launchConfirm").disabled = true;
+        $("launchConfirm").textContent = 'Opening your game…';
+      }
       host = await createHost({
+        launch,
         onJoin(pid, slot) {
           slots.set(pid, slot);
           game.addPlayer(pid, slot);
@@ -404,6 +426,8 @@
           else if (type === "again" && game.state === "over") game.start();
         },
       });
+      $("launchScreen").style.display = 'none';
+      if (launch) history.replaceState(null, '', location.pathname + location.search);
 
       $("codeText").textContent = host.code;
       $("urlText").textContent = host.joinUrl;
@@ -428,8 +452,9 @@
       qr.onerror = () => qrFallback();
       setTimeout(() => qrFallback(), 6000);
       qr.src = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=0&data=" + encodeURIComponent(host.joinUrl);
-      setConnected(false, "waiting for a phone");
+      setConnected(slots.size > 0, slots.size ? "wand connected" : "waiting for a phone");
     } catch (e) {
+      $("launchScreen").style.display = 'none';
       $("err").style.display = "flex";
       $("errText").textContent = e.message;
     }
