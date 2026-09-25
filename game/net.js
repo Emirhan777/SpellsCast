@@ -13,7 +13,7 @@
 //   status:        "lobby" | "playing" | "over"
 //   createdAt:     serverTimestamp()
 //   players/{pid}: { joinedAt, slot }        slot 0|1 -> blade colour
-//   input/{pid}:   { x, y, vx, vy, c, t }    set() ~50Hz, OVERWRITTEN not appended
+//   input/{pid}:   { x, y, vx, vy, c, t }    set() up to ~60Hz, OVERWRITTEN not appended
 //   cmd/{pid}:     { type, at }              "start" | "again" | "center"
 //   hud:           { score, best, lives, combo, status, spell, castOk }
 //
@@ -31,6 +31,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "../firebase-config.js";
 import { claimLaunch } from "./launch.js";
+import { createWandSender } from "./wand-stream.js";
 
 const db = getDatabase(getApps().length ? getApp() : initializeApp(firebaseConfig));
 
@@ -41,11 +42,6 @@ export const GAME_ID = "spellscast";
 
 export const MAX_SLOTS = 2;                     // one phone today, two tomorrow
 const HUD_MIN_MS = 200;                         // screen -> phone, ~5Hz is plenty
-// PenDrawOnline's cadence: at most every 30ms, and only when the point has
-// really moved (see sendBlade). Sending faster just delivers more of the
-// sensor's own dither to the screen.
-const BLADE_MIN_MS = 30;                        // phone -> screen, cap at ~33Hz
-const BLADE_KEEPALIVE_MS = 250;                 // resend even when perfectly still
 
 const newPid = () => "p_" + Math.random().toString(36).slice(2, 10);
 
@@ -185,13 +181,15 @@ export async function createController(code, { onHud, onStatus, onClosed } = {})
   if (onClosed) offs.push(onValue(ref(db, base + "/createdAt"), (s) => { if (!s.exists()) onClosed(); }));
 
   const inputRef = ref(db, base + "/input/" + pid);
-  let lastAt = 0, lastX = 0, lastY = 0, lastCast = 0;
+  const sender = createWandSender(sample => {
+    set(inputRef, sample).catch(() => {});
+  });
 
   return {
     pid, slot,
 
-    // TRANSPORT: the one write that carries the wand. Fire-and-forget - a
-    // dropped sample is irrelevant, the next one is 20ms behind it.
+    // TRANSPORT: positions coalesce to the latest sample every 16ms; the final
+    // point is flushed by a timer even when the phone stops moving.
     //
     // `cast` is the thumb: true while the cast button is held. It rides along
     // with the position rather than travelling as its own command, because the
@@ -199,23 +197,7 @@ export async function createController(code, { onHud, onStatus, onClosed } = {})
     // closed. A separate message would arrive a variable few tens of
     // milliseconds out of step and clip the ends off every gesture.
     sendBlade({ x, y, vx = 0, vy = 0, cast = false }) {
-      const now = performance.now();
-      const since = now - lastAt;
-      const flag = cast ? 1 : 0;
-      // The two edges of a cast are the only samples that are not optional: drop
-      // one and the screen either never opens the stroke or never closes it.
-      // They jump both throttles.
-      const edge = flag !== lastCast;
-      if (!edge && since < BLADE_MIN_MS) return false;
-      // Perfectly still? Still tick occasionally, so the screen can tell the
-      // difference between "not moving" and "phone fell off the network".
-      // PenDraw's deadband: a move smaller than half a percent of the screen is
-      // the sensor dithering, not the hand moving, and is not worth sending.
-      const moved = Math.hypot(x - lastX, y - lastY) >= 0.005;
-      if (!edge && !moved && since < BLADE_KEEPALIVE_MS) return false;
-      lastAt = now; lastX = x; lastY = y; lastCast = flag;
-      set(inputRef, { x, y, vx, vy, c: flag, t: Date.now() }).catch(() => {});
-      return true;
+      return sender.send({ x, y, vx, vy, cast });
     },
 
     sendCmd(type) {
@@ -223,6 +205,7 @@ export async function createController(code, { onHud, onStatus, onClosed } = {})
     },
 
     destroy() {
+      sender.destroy();
       offs.forEach((off) => off());
       remove(ref(db, base + "/players/" + pid)).catch(() => {});
       remove(ref(db, base + "/input/" + pid)).catch(() => {});

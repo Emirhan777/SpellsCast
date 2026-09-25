@@ -1,5 +1,11 @@
 # App Store release preparation
 
+## Wand responsiveness update (September 25, 2026)
+
+The source now shares a 16 ms movement sender with the browser controller, flushes the last pending position when movement stops, and limits link-pairing subscriptions to launch data. Cast press/release events send immediately. Automated steadiness, spell recognition, live Firebase and shared-link checks pass; physical iPhone latency still needs testing.
+
+Reload Expo Go to test this source. The uploaded production build **1.0.0 (3)** predates this fix; build and upload a replacement before submitting the app for review.
+
 ## Current release status (September 23, 2026)
 
 - App Store Connect record: [SpellsCast, Apple ID 6815057736](https://appstoreconnect.apple.com/apps/6815057736/distribution/ios/version/inflight).

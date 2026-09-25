@@ -23,10 +23,11 @@ export async function reserveScreen(token: string, signal: AbortSignal): Promise
     return {
       code, expiresAt, url: `${GAME_URL}#launch=${code}.${token}`, cancel,
       watch(ready, failed) {
-        return onValue(room, snapshot => {
+        // Pairing does not need the high-frequency input or HUD branches.
+        return onValue(ref(db, `rooms/${code}/launch`), snapshot => {
           const value = snapshot.val();
-          if (value?.launch?.token !== token) failed('This game link has closed. Create a new link.');
-          else if (value.launch.claimed && value.status !== 'waiting-screen') ready();
+          if (value?.token !== token) failed('This game link has closed. Create a new link.');
+          else if (value.claimed) ready();
         }, () => failed('Could not reach the screen. Check your connection and try again.'));
       },
     };

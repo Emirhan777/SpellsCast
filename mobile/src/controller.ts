@@ -1,7 +1,8 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getDatabase, ref, get, set, remove, onValue, onDisconnect, runTransaction, push } from 'firebase/database';
 import { firebaseConfig } from '../../firebase-config';
-import { GAME_ID, parseRoom, claimPlayer, createSampleGate, type Hud, type Point } from './protocol';
+import { GAME_ID, parseRoom, claimPlayer, type Hud, type Point } from './protocol';
+import { createWandSender } from '../../game/wand-stream';
 
 const db = getDatabase(getApps().length ? getApp() : initializeApp(firebaseConfig));
 export type Controller = { send: (sample: Point) => void; command: (type: 'start' | 'center') => void; destroy: () => void };
@@ -13,10 +14,12 @@ export async function joinRoom(code: string, callbacks: Callbacks, signal: Abort
   const nodes = ['players', 'input', 'cmd'].map(part => ref(db, `${base}/${part}/${pid}`));
   const disconnects = nodes.map(node => onDisconnect(node));
   const offs: (() => void)[] = [];
+  let sender: ReturnType<typeof createWandSender> | undefined;
   let disposed = false, closing = false;
   const destroy = () => {
     if (disposed) return;
     disposed = true;
+    sender?.destroy();
     offs.forEach(off => off());
     signal.removeEventListener('abort', destroy);
     // Keep onDisconnect armed until the explicit removal is acknowledged.
@@ -60,12 +63,13 @@ export async function joinRoom(code: string, callbacks: Callbacks, signal: Abort
       if (s.val()) wasConnected = true;
       else if (wasConnected) closed('Connection lost. Rejoin when your internet is back.');
     }));
-    const gate = createSampleGate();
+    sender = createWandSender(wire => {
+      void set(nodes[1], wire).catch(() => closed('Could not send wand movement. Please rejoin.'));
+    });
     return {
       send(sample) {
         if (disposed) return;
-        const wire = gate(sample);
-        if (wire) void set(nodes[1], wire).catch(() => closed('Could not send wand movement. Please rejoin.'));
+        sender!.send(sample);
       },
       command(type) {
         if (!disposed) void set(nodes[2], { type, at: Date.now() }).catch(() => closed('Connection lost. Please rejoin.'));

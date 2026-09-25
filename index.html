@@ -15,7 +15,7 @@
     (() => {
       const v = Date.now().toString(36);
       const files = ["game/engine.js", "game/audio.js", "game/music.js", "game/blade.js", "game/spells.js",
-        "game/targets.js", "game/net.js", "game/launch.js", "game/tilt.js", "firebase-config.js"];
+        "game/targets.js", "game/net.js", "game/wand-stream.js", "game/launch.js", "game/tilt.js", "firebase-config.js"];
       const imports = {};
       for (const f of files) {
         const url = new URL(f, document.baseURI).href;

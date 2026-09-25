@@ -220,8 +220,8 @@ const STILL_STEP_BUDGET = 0.004, STILL_CRAWL_BUDGET = 0.02, FOLLOW_LAG_BUDGET = 
 //
 // Everything above feeds the engine through inputLocal(), which skips the phone
 // entirely. This drives the chain the way a phone does: noisy deviceorientation
-// angles into game/tilt.js, PenDraw's send cadence from game/net.js (at most
-// every 30ms, a 0.005 deadband, cast edges always sent), 80ms of flight time
+// angles into game/tilt.js, the actual shared sender (cast edges always sent),
+// 80ms of flight time
 // with jitter, and the wand on the other end. It measures how still the tip is
 // when the hand is, how far behind it sits when the hand moves, and whether the
 // runes still read.
@@ -231,7 +231,7 @@ const { createTracker, YAW_GAIN, PITCH_GAIN } = await import("../game/tilt.js");
 const { recognize } = await import("../game/spells.js");
 
 const NET_MS = 80, JITTER_MS = 25;
-const SEND_MIN_MS = 30, DEADBAND = 0.005, KEEPALIVE_MS = 250;   // must track game/net.js
+const { createWandSender } = await import("../game/wand-stream.js");
 const NOISE_DEG = 0.18;          // dither a real fusion output carries, per angle
 // Tipped back about 45 degrees: the pose you hold a phone in while looking at the
 // cast pad on it. It is PenDraw's pose too.
@@ -248,7 +248,13 @@ function overTheWire(hand, durMs, castWindow = null) {
   const tracker = createTracker();
   const blade = createBlade(0);
   const inflight = [];
-  let lastSendAt = -1e9, lastSx = 0, lastSy = 0, lastC = false;
+  let senderTime = 0, timer = null, lastArrival = 0;
+  const sender = createWandSender(s => {
+    lastArrival = Math.max(lastArrival, senderTime + NET_MS + (nrnd() - 0.5) * 2 * JITTER_MS);
+    inflight.push({ at: lastArrival, s, c: !!s.c });
+  }, { now: () => senderTime,
+    schedule: (fn, ms) => { timer = { fn, at: senderTime + ms }; return timer; },
+    cancel: () => { timer = null; } });
   let nextSampleAt = 0, stroke = null;
   const rendered = [];
 
@@ -258,16 +264,12 @@ function overTheWire(hand, durMs, castWindow = null) {
       const h = hand(nextSampleAt);
       const s = tracker.push(h.yaw + ngauss() * NOISE_DEG, BETA0 + h.pitch + ngauss() * NOISE_DEG);
       if (s) {
-        // The same gate as sendBlade(): a cast edge always goes; otherwise wait
-        // 30ms, and send only a real move or a keepalive.
-        const c = !!(castWindow && nextSampleAt >= castWindow[0] && nextSampleAt <= castWindow[1]);
-        const edge = c !== lastC;
-        const since = nextSampleAt - lastSendAt;
-        const moved = Math.hypot(s.x - lastSx, s.y - lastSy) >= DEADBAND;
-        if (edge || (since >= SEND_MIN_MS && (moved || since >= KEEPALIVE_MS))) {
-          lastSendAt = nextSampleAt; lastSx = s.x; lastSy = s.y; lastC = c;
-          inflight.push({ at: nextSampleAt + NET_MS + (nrnd() - 0.5) * 2 * JITTER_MS, s, c });
+        if (timer && timer.at <= nextSampleAt) {
+          senderTime = timer.at; const fn = timer.fn; timer = null; fn();
         }
+        senderTime = nextSampleAt;
+        const cast = !!(castWindow && nextSampleAt >= castWindow[0] && nextSampleAt <= castWindow[1]);
+        sender.send({ ...s, cast });
       }
       nextSampleAt += 1000 / 60;
     }
@@ -282,6 +284,7 @@ function overTheWire(hand, durMs, castWindow = null) {
     const st = blade.takeStroke();
     if (st && st.length > 4) stroke = st;
   }
+  sender.destroy();
   return { rendered, stroke };
 }
 

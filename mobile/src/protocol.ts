@@ -22,20 +22,6 @@ export function parseRoom(input: string): string {
 export type Point = { x: number; y: number; vx?: number; vy?: number; cast?: boolean };
 export type Hud = { score?: number; best?: number; lives?: number; combo?: number; spell?: string; castOk?: boolean; status?: string };
 
-// Match the browser relay: cast edges always bypass rate and movement limits.
-export function createSampleGate(now = () => performance.now()) {
-  let lastAt = -Infinity, lastX = 0.5, lastY = 0.5, lastCast = false;
-  return (sample: Point) => {
-    if (![sample.x, sample.y].every(Number.isFinite)) return null;
-    const time = now(), cast = !!sample.cast;
-    const x = Math.min(1, Math.max(0, sample.x)), y = Math.min(1, Math.max(0, sample.y));
-    const edge = cast !== lastCast, since = time - lastAt;
-    if (!edge && (since < 30 || (Math.hypot(x - lastX, y - lastY) < 0.005 && since < 250))) return null;
-    lastAt = time; lastX = x; lastY = y; lastCast = cast;
-    return { x, y, vx: 0, vy: 0, c: cast ? 1 : 0, t: Date.now() };
-  };
-}
-
 // Pure transaction callback; the native controllers cannot claim the same slot.
 export function claimPlayer(players: Record<string, { slot: number }> | null, pid: string) {
   const current = players || {};

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { parseRoom, claimPlayer, createSampleGate } from '../src/protocol';
+import { parseRoom, claimPlayer } from '../src/protocol';
 import { createTracker } from '../../game/tilt.js';
 import { SPELLS, recognize } from '../../game/spells.js';
 import { createBlade } from '../../game/blade.js';
@@ -17,17 +17,6 @@ test('slot claims preserve players, fill gaps, and reject a third wand', () => {
  assert.equal(claimPlayer(second,'c'),undefined);
  assert.equal(claimPlayer({b:{slot:1}},'c')!.c.slot,0);
  assert.deepEqual(claimPlayer(second,'a'),second);
-});
-test('a rapid press/release is delivered even inside the movement throttle', () => {
- let now=0; const send=createSampleGate(()=>now);
- assert.equal(send({x:.5,y:.5})!.c,0);
- now=2; assert.equal(send({x:.5,y:.5,cast:true})!.c,1);
- now=3; assert.equal(send({x:.5,y:.5,cast:false})!.c,0);
- now=10; assert.equal(send({x:.6,y:.6}),null);
- now=34; assert.ok(send({x:.6,y:.6}));
- now=80; assert.equal(send({x:.6,y:.6}),null);
- now=284; assert.ok(send({x:.6,y:.6}));
- assert.equal(send({x:NaN,y:.5}),null);
 });
 test('native radians map to centered motion, correct directions and seamless yaw wrap', () => {
  const native = (yaw:number,pitch:number) => tracker.push(yaw*180/Math.PI,pitch*180/Math.PI)!;

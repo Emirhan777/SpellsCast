@@ -1,13 +1,15 @@
 // Explicit network integration test; creates and removes one unused test room.
 import assert from 'node:assert/strict';
 import { initializeApp, deleteApp } from 'firebase/app';
-import { getDatabase, get, ref, remove, set } from 'firebase/database';
+import { getDatabase, get, ref, remove, set, runTransaction } from 'firebase/database';
 import { firebaseConfig } from '../../firebase-config.js';
 import { joinRoom } from '../src/controller';
+import { reserveScreen } from '../src/launch';
+import { claimLaunch } from '../../game/launch.js';
 async function main() {
 const app=initializeApp(firebaseConfig,'mobile-relay-test');
 const db=getDatabase(app);
-let code='', room:any;
+let code='', room:any, launchRoom:any, stopWatching:(()=>void)|undefined;
 const sessions: Awaited<ReturnType<typeof joinRoom>>[]=[];
 const pause=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
 try {
@@ -28,9 +30,26 @@ try {
  assert.equal((Object.values(value.input)[0] as any).x,.8);
  assert.equal((Object.values(value.cmd)[0] as any).type,'start');
  assert.equal(hud.score,25);assert.equal(status,'playing');
+ // A final movement inside the throttle must reach the real backend without a heartbeat.
+ a.send({x:.25,y:.4}); a.send({x:.75,y:.6});
+ await pause(200);
+ assert.equal((Object.values((await get(ref(db,`rooms/${code}/input`))).val())[0] as any).x,.75);
  await remove(room);await pause(400);assert.match(closed,/closed/);
- console.log('PASS live relay: slots, capacity, cast release, command, HUD, status, host closure');
-} finally {sessions.forEach(s=>s.destroy());if(room)await remove(room);await deleteApp(app);}
+ const token='e'.repeat(32);
+ const ticket=await reserveScreen(token,new AbortController().signal);
+ launchRoom=ref(db,'rooms/'+ticket.code);
+ let readyCount=0, failureCount=0;
+ stopWatching=ticket.watch(()=>readyCount++,()=>failureCount++);
+ const claim=await runTransaction(launchRoom,value=>value===null?null:claimLaunch(value,token),{applyLocally:false});
+ assert.ok(claim.committed && claim.snapshot.exists());
+ await pause(400); assert.equal(readyCount,1);
+ await Promise.all(Array.from({length:20},(_,i)=>set(ref(db,`rooms/${ticket.code}/input/probe`),{x:i/20,y:.5,c:0,t:Date.now()})));
+ await set(ref(db,`rooms/${ticket.code}/hud`),{score:20});
+ await pause(200); assert.equal(readyCount,1,'pairing must not receive movement/HUD updates');
+ await ticket.cancel(); assert.ok((await get(launchRoom)).exists(),'closing setup must preserve the claimed game');
+ await remove(launchRoom); await pause(300); assert.equal(failureCount,1);
+ console.log('PASS live relay: slots, capacity, cast release, final movement, HUD, host closure, link pairing isolation and cleanup');
+} finally {stopWatching?.();sessions.forEach(s=>s.destroy());if(room)await remove(room);if(launchRoom)await remove(launchRoom);await deleteApp(app);}
 process.exit(0);
 }
 main().catch(error=>{console.error(error);process.exit(1);});
