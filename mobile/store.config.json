@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "copyright": "2026 Emirhan Şimşek",
     "categories": [["GAMES", "GAMES_CASUAL", "GAMES_ACTION"], "ENTERTAINMENT"],
     "info": {
@@ -9,6 +9,7 @@
         "title": "SpellsCast",
         "subtitle": "Your phone becomes a wand",
         "promoText": "Turn your phone to a magic wand",
+        "releaseNotes": "Improved wand responsiveness with faster movement updates and more reliable final-position delivery. Game-link sharing and automatic pairing remain available.",
         "description": "Turn your iPhone into a magic wand and bring spells to life on a bigger screen.\n\nSTART FROM YOUR PHONE\nSend a game link to your computer using Messages, email, AirDrop to a Mac, or another sharing app. Open the link on that screen, confirm, and your iPhone connects automatically. Already have a game open? Scan its QR code or enter the six-digit room code.\n\nCAST WITH MOTION OR TOUCH\nHold the cast pad, move your phone through a rune, and release. Prefer touch controls? Draw the rune directly on the pad. Follow your score and lives on your phone and feel your casts with haptic feedback.\n\nLEARN FOUR SPELLS\nExpel rogue mages, levitate feathers, banish ghosts, and shatter serpents. Practice all four runes offline, even when you do not have another screen nearby.\n\nPLAY TOGETHER\nConnect up to two phones to the same game. Built-in guides help you set up a TV browser, connect a computer with HDMI, or mirror a Mac using AirPlay.\n\nConnected play requires internet access and a separate computer or compatible TV browser displaying https://emirhan777.github.io/SpellsCast/. Music and sound play on that screen. TV browser and AirPlay support depend on your devices. No player account is required.",
         "keywords": ["wand", "spells", "magic", "motion", "party", "controller", "runes", "multiplayer", "fantasy"],
         "marketingUrl": "https://emirhan777.github.io/SpellsCast/",
