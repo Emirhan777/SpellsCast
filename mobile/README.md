@@ -26,8 +26,8 @@ For a timed two-player match, select **Wizard duel** and its length on the big
 screen, then join the same QR/room from both phones. The updated controller shows
 your wizard number, your score, the opponent's score, time remaining and the
 winner. Tap **Start duel** once both wizards are connected, or **Rematch** after
-the result. This native source needs a new build to update an installed app;
-the existing uploaded 1.0.1 (5) binary predates the duel HUD.
+the result. The duel HUD is included in version 1.1.0 (6), submitted to Apple and waiting
+for review. The published 1.0.1 (5) binary predates the duel HUD.
 
 ## Start a game from the app
 
