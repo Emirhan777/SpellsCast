@@ -1,8 +1,16 @@
 # App Store release preparation
 
-## Multiplayer source update (October 9, 2026)
+## Current release status (October 9, 2026)
 
-The browser now offers **Wizard duel** with two separate wizard scores and 60, 90, 120 or 180-second matches. The first correct cast received by the host claims a target for one point; the highest score wins when time expires, with ties shown as draws. The native source displays each player's own score, opponent score, timer and result. Reload Expo Go to test it. Uploaded version **1.0.1 (5)** predates these native changes; a new production build is required to deliver the duel HUD to installed iPhone apps.
+- Apple confirms **1.0.1 (5)** is the currently published release.
+- Multiplayer update **1.1.0 (6)** built successfully, was verified for bundle `com.emirhansimsek.spellscast`, uploaded without errors or warnings, processed as `VALID`, and attached to version 1.1.0. [EAS production build](https://expo.dev/accounts/emirhansimsek_lightning/projects/spellscast/builds/dc33f3d2-14ab-4bd6-ad75-6b9e2cb97ba9).
+- **Submitted October 9, 2026; Apple status: WAITING_FOR_REVIEW.** Review submission ID: `30dd95b0-11c4-4752-a4f4-7115b601104f`. The update will release automatically after approval (`AFTER_APPROVAL`); it is not live yet.
+- Saved multiplayer description, release notes, keywords, support URL, review instructions and complete review contact. Promotional text remains **Turn your phone to a magic wand**. Six existing native screenshots are attached.
+- Native lint, typecheck, all nine unit tests and live Firebase relay checks passed. The two-phone browser integration verified timed scoring, results, rematches and disconnects. Physical iPhone latency has not been measured for this release.
+
+## Multiplayer update (October 9, 2026)
+
+The browser now offers **Wizard duel** with two separate wizard scores and 60, 90, 120 or 180-second matches. The first correct cast received by the host claims a target for one point; the highest score wins when time expires, with ties shown as draws. The native source displays each player's own score, opponent score, timer and result. Production version **1.1.0 (6)** includes these changes and is waiting for Apple review. Version 1.0.1 (5) predates the duel HUD.
 
 ## Wand responsiveness update (September 25, 2026)
 
@@ -10,7 +18,7 @@ The source now shares a 16 ms movement sender with the browser controller, flush
 
 This fix is included in production version **1.0.1 (5)**. Version 1.0.0 (3) predates the fix.
 
-## Current release status (September 25, 2026)
+## Historical release preparation (September 25, 2026)
 
 - App Store Connect record: [SpellsCast, Apple ID 6815057736](https://appstoreconnect.apple.com/apps/6815057736/distribution/ios/version/inflight).
 - App Store Connect confirms that **1.0.0 (3)** is live (`READY_FOR_DISTRIBUTION`).
@@ -24,7 +32,7 @@ This fix is included in production version **1.0.1 (5)**. Version 1.0.0 (3) pred
 
 ## Release assets
 
-The version 1.0.1 listing and release notes are prepared in `store.config.json`. The promotional text is exactly **Turn your phone to a magic wand**. `store-review-notes.txt` explains the companion-screen requirement and offline review mode.
+The version 1.1.0 listing and release notes are prepared in `store.config.json`. The promotional text is exactly **Turn your phone to a magic wand**. `store-review-notes.txt` explains the companion-screen requirement and offline review mode.
 
 Six verified native iPhone screenshots are available in [store-assets/screenshots/en-US/6.9-inch](store-assets/screenshots/en-US/6.9-inch/). They are 1320 x 2868 RGB PNGs captured from the standalone Release app on an iPhone 17 Pro Max simulator. [Capture details](store-assets/README.md) record the source builds. All six screenshots are uploaded and processed in App Store Connect.
 
