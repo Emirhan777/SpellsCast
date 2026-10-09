@@ -14,3 +14,6 @@ To review without another device, camera, or motion access:
 Choose Practice your spells. Draw each displayed rune with your finger. Tap another spell to change the guide. This mode works offline.
 
 The camera is used only to scan the room QR and does not save or upload images. Motion controls convert orientation to wand coordinates. Sound plays on the computer or TV game screen. A TV must have a compatible browser, or display a computer via HDMI or Mac AirPlay. Standard iPhone mirroring displays the phone controller.
+
+To review Wizard duel:
+On the computer game screen, select Wizard duel and a match length. Connect two phones to the same room, then select Start duel. Both phones display individual scores, opponent scores, the timer, and the final result. The first correct cast received by the game claims each target for one point. Select Rematch to play again. Classic mode and offline practice can be reviewed using one phone.
