@@ -32,6 +32,7 @@ import {
 import { firebaseConfig } from "../firebase-config.js";
 import { claimLaunch } from "./launch.js";
 import { createWandSender } from "./wand-stream.js";
+import { claimPlayerSlot, controllerHud } from "./match.js";
 
 const db = getDatabase(getApps().length ? getApp() : initializeApp(firebaseConfig));
 
@@ -40,7 +41,7 @@ const db = getDatabase(getApps().length ? getApp() : initializeApp(firebaseConfi
 // other's rooms. Change this ONCE when you fork - it is the only place it lives.
 export const GAME_ID = "spellscast";
 
-export const MAX_SLOTS = 2;                     // one phone today, two tomorrow
+export const MAX_SLOTS = 2;                     // two wizard slots
 const HUD_MIN_MS = 200;                         // screen -> phone, ~5Hz is plenty
 
 const newPid = () => "p_" + Math.random().toString(36).slice(2, 10);
@@ -160,21 +161,19 @@ export async function createController(code, { onHud, onStatus, onClosed } = {})
   if (room.game && room.game !== GAME_ID) throw new Error("That code belongs to a different game.");
   if (room.status === 'waiting-screen') throw new Error('Open the shared link on your big screen first.');
 
-  // Claim the lowest free slot. Slot decides the blade colour on the big screen.
-  const taken = new Set(Object.values(room.players || {}).map((p) => p?.slot));
-  let slot = 0;
-  while (taken.has(slot) && slot < MAX_SLOTS) slot++;
-  if (slot >= MAX_SLOTS) throw new Error("This game already has all its players.");
-
   const pid = newPid();
-  await set(ref(db, base + "/players/" + pid), { joinedAt: serverTimestamp(), slot });
-  // Leave nothing behind when this phone locks, closes or wanders off wifi.
-  onDisconnect(ref(db, base + "/players/" + pid)).remove();
-  onDisconnect(ref(db, base + "/input/" + pid)).remove();
-  onDisconnect(ref(db, base + "/cmd/" + pid)).remove();
+  const playerRef = ref(db, base + '/players/' + pid);
+  await Promise.all(['players', 'input', 'cmd'].map(part => onDisconnect(ref(db, base + '/' + part + '/' + pid)).remove()));
+  const claim = await runTransaction(ref(db, base + '/players'), players => claimPlayerSlot(players, pid), { applyLocally: false });
+  if (!claim.committed) throw new Error('This game already has two wands.');
+  const slot = claim.snapshot.val()[pid].slot;
+  if ((await get(ref(db, base + '/createdAt'))).val() !== room.createdAt) {
+    await remove(playerRef);
+    throw new Error('The screen changed rooms. Scan its new QR.');
+  }
 
   const offs = [];
-  if (onHud) offs.push(onValue(ref(db, base + "/hud"), (s) => onHud(s.val() || {})));
+  if (onHud) offs.push(onValue(ref(db, base + "/hud"), (s) => onHud(controllerHud(s.val() || {}, pid, slot))));
   if (onStatus) offs.push(onValue(ref(db, base + "/status"), (s) => onStatus(s.val())));
   // The host holds onDisconnect().remove() on the room, so the room vanishing
   // IS the "big screen went away" signal.

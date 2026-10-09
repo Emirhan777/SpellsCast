@@ -227,7 +227,8 @@ export default function SpellsCast() {
   const active = phase === 'playing' || phase === 'practice';
   const isPractice = phase === 'practice';
   const lives = hud.lives ?? 3;
-  const castTitle = echo || (casting ? 'Weave your spell…' : isPractice ? SPELLS[practiceSpell].name : status === 'over' ? 'Wand down' : 'Ready to cast');
+  const duel = !isPractice && hud.mode === 'duel';
+  const castTitle = duel && status === 'over' ? hud.result || 'Match finished' : echo || (casting ? 'Weave your spell…' : isPractice ? SPELLS[practiceSpell].name : status === 'over' ? 'Wand down' : 'Ready to cast');
 
   return <LinearGradient colors={['#21152f', '#0a0811', '#0a0811']} style={styles.root}>
     <StatusBar style="light" />
@@ -273,8 +274,9 @@ export default function SpellsCast() {
         </View>
       </ScrollView> : <View style={styles.controller}>
         <View style={styles.topRow}>
-          <View><Text style={styles.small}>{isPractice ? 'SPELL PRACTICE' : 'SCORE'}</Text><Text style={styles.score}>{isPractice ? `${practiceSpell + 1} / 4` : hud.score ?? 0}</Text></View>
-          <View style={styles.topRight}>{!isPractice && <Text accessibilityLabel={`${lives} lives remaining`} style={styles.hearts}>{[0, 1, 2].map(i => i < lives ? '●' : '○').join(' ')}</Text>}
+          <View><Text style={styles.small}>{isPractice ? 'SPELL PRACTICE' : duel ? `WIZARD ${hud.wizardNumber} · YOUR SCORE` : 'SCORE'}</Text><Text style={styles.score}>{isPractice ? `${practiceSpell + 1} / 4` : hud.score ?? 0}</Text>
+            {duel && <Text style={styles.small}>Opponent: {hud.opponentScore ?? 0} · {hud.timeLeft ?? 0}s left</Text>}</View>
+          <View style={styles.topRight}>{!isPractice && !duel && <Text accessibilityLabel={`${lives} lives remaining`} style={styles.hearts}>{[0, 1, 2].map(i => i < lives ? '●' : '○').join(' ')}</Text>}
             <Pressable accessibilityRole="button" onPress={leave} hitSlop={12}><Text style={styles.link}>{isPractice ? 'Done' : 'Leave room'}</Text></Pressable></View>
         </View>
         <View style={styles.castHeader}><Text numberOfLines={2} style={styles.castTitle}>{castTitle}</Text>
@@ -301,7 +303,7 @@ export default function SpellsCast() {
           style={[styles.spellCard, isPractice && index === practiceSpell && styles.selectedCard]}><Rune spell={spell} size={34} /><Text style={[styles.spellName, { color: spell.color }]}>{spell.name}</Text><Text style={styles.spellMove}>{spell.move}</Text></Pressable>)}</View>
         {!isPractice && <View style={styles.controlRow}>
           <View style={{ flex: 1 }}><Button title={mode === 'tilt' ? 'Center wand' : 'Use motion'} secondary disabled={motionBusy} onPress={() => { release(true); if (mode === 'tilt') { centerWand(); feedback('Wand centered'); haptic(); } else void startTilt(); }} /></View>
-          <View style={{ flex: 1 }}><Button title={status === 'playing' ? (mode === 'tilt' ? 'Use touch' : 'Leave room') : status === 'over' ? 'Play again' : 'Start game'}
+          <View style={{ flex: 1 }}><Button disabled={duel && status !== 'playing' && !hud.matchReady} title={status === 'playing' ? (mode === 'tilt' ? 'Use touch' : 'Leave room') : status === 'over' ? duel ? 'Rematch' : 'Play again' : duel ? 'Start duel' : 'Start game'}
             secondary={status === 'playing'} onPress={() => { if (status === 'playing') { if (mode === 'tilt') { release(true); setMode('touch'); } else leave(); } else controller.current?.command('start'); }} /></View>
         </View>}
         <Text style={styles.connection}>{isPractice ? 'OFFLINE PRACTICE · no room needed' : `● ROOM ${code} · ${mode.toUpperCase()}`}</Text>

@@ -16,7 +16,7 @@
     (() => {
       const v = Date.now().toString(36);
       const files = ["game/engine.js", "game/audio.js", "game/blade.js", "game/spells.js",
-        "game/targets.js", "game/net.js", "game/wand-stream.js", "game/tilt.js", "firebase-config.js"];
+        "game/targets.js", "game/net.js", "game/match.js", "game/wand-stream.js", "game/tilt.js", "firebase-config.js"];
       const imports = {};
       for (const f of files) {
         const url = new URL(f, document.baseURI).href;
@@ -144,7 +144,7 @@
   <!-- 2. the controller -->
   <div class="screen" id="ctrl">
     <div id="ctrlTop">
-      <div id="hudScore"><div class="lbl">SCORE</div><div class="val" id="scoreVal">0</div></div>
+      <div id="hudScore"><div class="lbl" id="scoreLabel">SCORE</div><div class="val" id="scoreVal">0</div><div id="duelInfo" style="font-size:13px;color:#c9bfdc" hidden></div></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <div id="hudLives"></div>
         <div id="modeTag">TILT</div>
@@ -196,6 +196,7 @@
     let ctrl = null;
     let mode = null;            // "tilt" | "touch"
     let lastStatus = null;
+    let latestHud = {}, castMsgTimer = 0;
     let wakeLock = null;
 
     // The thumb. Everything about casting reduces to this one boolean and the
@@ -248,9 +249,16 @@
     try {
       ctrl = await createController(code, {
         onHud(hud) {
+          latestHud = hud;
           $("scoreVal").textContent = hud.score ?? 0;
           renderLives(hud.lives ?? 3);
-          if (hud.spell) showCast(hud.spell, hud.castOk, hud.combo);
+          const duel = hud.mode === 'duel';
+          $('scoreLabel').textContent = duel ? `WIZARD ${hud.wizardNumber} · YOUR SCORE` : 'SCORE';
+          $('hudLives').style.display = duel ? 'none' : 'flex';
+          $('duelInfo').hidden = !duel;
+          $('duelInfo').textContent = `Opponent: ${hud.opponentScore ?? 0} · ${hud.timeLeft ?? 0}s left`;
+          if (hud.spell && hud.status !== 'over') showCast(hud.spell, hud.castOk, hud.combo);
+          if (duel && ['lobby', 'over'].includes(hud.status)) paintStatus(hud.status);
         },
         onStatus(status) {
           lastStatus = status;
@@ -296,7 +304,6 @@
     // Echo the big screen's verdict on the last cast. You are looking at your
     // hand as often as at the screen, so the phone has to be able to tell you
     // whether that one worked.
-    let castMsgTimer = 0;
     function showCast(name, ok, combo) {
       const spell = SPELLS.find((s) => s.name === name);
       $("castMsg").textContent = name;
@@ -313,17 +320,18 @@
       const over = status === "over";
       const idle = over || status === "lobby" || status == null;
       $("againBtn").style.display = idle ? "block" : "none";
-      $("againBtn").textContent = over ? "Play again" : "Start";
+      $("againBtn").textContent = over ? 'Rematch' : latestHud.mode === 'duel' ? 'Start duel' : 'Start';
+      $('againBtn').disabled = latestHud.mode === 'duel' && !latestHud.matchReady;
       $("castMsg").style.color = "";
       if (over) {
-        $("castMsg").textContent = "Wand down";
-        $("castSub").textContent = "Cast any spell to play again.";
+        $("castMsg").textContent = latestHud.mode === 'duel' ? latestHud.result || 'Match finished' : 'Wand down';
+        $("castSub").textContent = latestHud.mode === 'duel' ? 'Tap Rematch for another duel.' : 'Cast any spell to play again.';
       } else if (status === "playing") {
         $("castMsg").textContent = "Cast!";
         $("castSub").textContent = mode === "touch" ? "Drag to draw the rune." : "Hold, draw the rune, release.";
       } else {
         $("castMsg").textContent = "Ready";
-        $("castSub").textContent = "Cast any spell to begin.";
+        $("castSub").textContent = latestHud.mode === 'duel' ? latestHud.matchReady ? 'Both wizards ready. Tap Start duel.' : 'Waiting for the second wizard to join.' : 'Cast any spell to begin.';
       }
     }
     paintStatus(null);

@@ -15,7 +15,7 @@
     (() => {
       const v = Date.now().toString(36);
       const files = ["game/engine.js", "game/audio.js", "game/music.js", "game/blade.js", "game/spells.js",
-        "game/targets.js", "game/net.js", "game/wand-stream.js", "game/launch.js", "game/tilt.js", "firebase-config.js"];
+        "game/targets.js", "game/net.js", "game/match.js", "game/wand-stream.js", "game/launch.js", "game/tilt.js", "firebase-config.js"];
       const imports = {};
       for (const f of files) {
         const url = new URL(f, document.baseURI).href;
@@ -143,6 +143,29 @@
     #launchScreen button { padding: 18px 28px; border: 0; border-radius: 16px; background: #eed297;
       color: #281b31; font: 800 20px var(--font); cursor: pointer; }
   </style>
+  <style>
+    #matchSetup { position: fixed; top: 15vh; right: 3vw; z-index: 8; width: min(250px, 27vw);
+      padding: 18px; display: grid; gap: 12px; background: #191326ee; border: 1px solid #665779; border-radius: 16px; }
+    #matchSetup label { display: grid; gap: 6px; color: #c9bfdc; font-size: 14px; }
+    #durationLabel[hidden] { display: none; }
+    #matchSetup select, #matchSetup button { font: inherit; min-height: 44px; padding: 8px; border-radius: 9px; }
+    #matchSetup select { color: white; background: #302440; border: 1px solid #655779; }
+    #matchSetup button { border: 0; background: #eed297; color: #281b31; font-weight: 800; cursor: pointer; }
+    #matchSetup button:disabled { opacity: .45; cursor: default; }
+    #matchHelp { font-size: 13px; line-height: 1.5; color: #c9bfdc; }
+    #duelHud { position: fixed; top: 3vh; left: 3vw; right: 17vh; z-index: 7; display: none;
+      justify-content: space-between; align-items: center; gap: 24px; pointer-events: none; }
+    #duelHud .wizard { font-size: clamp(14px, 2vh, 24px); font-weight: 800; color: #7fdcff; }
+    #duelHud .wizard:last-child { color: #ff9ad5; text-align: right; }
+    #duelHud strong { display: block; color: white; font-size: clamp(26px, 5vh, 48px); }
+    #duelTime { color: #ffe9a8; font-size: clamp(24px, 4vh, 38px); font-variant-numeric: tabular-nums; }
+    body.duel #soundPrompt { top: 10vh; }
+    body.duel #lobby { gap: 1.8vh; transform: translateY(-3vh); }
+    body.duel #lobby h1 { font-size: 4.8vh; }
+    body.duel #lobby .card img, body.duel #lobby .card .fallback { width: 28vh; height: 28vh; }
+    @media (max-width: 700px) { #matchSetup { top: auto; bottom: 8vh; right: 2vw; width: 190px; padding: 12px; }
+      #lobby, body.duel #lobby { transform: translate(-14vw, -2vh) scale(.75); } #duelHud { gap: 12px; right: 14vh; } }
+  </style>
 </head>
 <body>
   <canvas id="stage"></canvas>
@@ -160,6 +183,17 @@
   </div>
 
   <div id="livesBox" class="ov" style="display:none"></div>
+  <div id="duelHud" aria-label="Wizard duel scoreboard">
+    <div class="wizard">Wizard 1 · blue<strong id="wizard1Score">0</strong></div>
+    <div id="duelTime" aria-label="Time remaining">1:30</div>
+    <div class="wizard">Wizard 2 · pink<strong id="wizard2Score">0</strong></div>
+  </div>
+  <aside id="matchSetup" aria-label="Game setup">
+    <label>Game mode<select id="modeSelect"><option value="solo">Classic</option><option value="duel">Wizard duel · 2 players</option></select></label>
+    <label id="durationLabel" hidden>Match length<select id="durationSelect"><option value="60">1 minute</option><option value="90" selected>90 seconds</option><option value="120">2 minutes</option><option value="180">3 minutes</option></select></label>
+    <p id="matchHelp" role="status">Connect your wand, then start.</p>
+    <button id="startMatch" disabled>Start game</button>
+  </aside>
 
   <div id="topControls">
     <button class="iconBtn" id="soundBtn" title="Toggle Sound (M)">🔊</button>
@@ -228,25 +262,49 @@
     // synchronously while it is still being constructed.
     let host = null;
     let connected = false;
+    let latestHud = {};
     const slots = new Map();  // pid -> slot
 
     // ---- the game runs whether or not a phone ever shows up -----------------
     const game = createGame($("stage"), {
       onHud: (hud) => {
+        latestHud = hud;
         $("scoreVal").textContent = hud.score;
         $("bestVal").textContent = (hud.score >= hud.best ? "NEW BEST " : "BEST ") + hud.best;
         renderLives(hud.lives);
+        renderMatch(hud);
         host?.setHud(hud);
       },
       onState: (state) => {
         const playing = state === "playing" || state === "countdown" || state === "over";
-        $("scoreBox").style.display = playing ? "block" : "none";
-        $("livesBox").style.display = playing ? "flex" : "none";
-        $("lobby").style.display = state === "lobby" && !connected ? "flex" : "none";
-        $("ready").style.display = state === "lobby" && connected ? "flex" : "none";
+        renderMatch({ ...latestHud, status: state });
         host?.setStatus(state === "countdown" ? "playing" : state);
       },
     });
+
+    function renderMatch(hud) {
+      const duel = hud.mode === 'duel', active = ['playing', 'countdown'].includes(hud.status);
+      document.body.classList.toggle('duel', duel);
+      $('duelHud').style.display = duel ? 'flex' : 'none';
+      $('scoreBox').style.display = !duel && hud.status !== 'lobby' ? 'block' : 'none';
+      $('livesBox').style.display = !duel && hud.status !== 'lobby' ? 'flex' : 'none';
+      $('matchSetup').style.display = active ? 'none' : 'grid';
+      $('durationLabel').hidden = !duel;
+      $('lobby').style.display = hud.status === 'lobby' && (duel || !connected) ? 'flex' : 'none';
+      $('ready').style.display = hud.status === 'lobby' && connected && !duel ? 'flex' : 'none';
+      const players = Object.values(hud.wizards || {});
+      for (const slot of [0, 1]) $('wizard' + (slot + 1) + 'Score').textContent = players.find(w => w.slot === slot)?.score ?? 0;
+      const seconds = hud.timeLeft ?? 90;
+      $('duelTime').textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+      $('startMatch').disabled = duel ? !hud.matchReady : !connected;
+      $('startMatch').textContent = hud.status === 'over' ? 'Rematch' : duel ? 'Start duel' : 'Start game';
+      $('matchHelp').textContent = hud.matchNotice || (duel
+        ? hud.matchReady ? 'Both wizards ready. First correct cast earns 1 point per target. Highest score wins.' : `Scan the QR on both phones. ${players.length} / 2 wizards connected.`
+        : 'Cast a spell or press Start game.');
+    }
+    $('modeSelect').onchange = () => game.configureMatch($('modeSelect').value, Number($('durationSelect').value));
+    $('durationSelect').onchange = () => game.configureMatch($('modeSelect').value, Number($('durationSelect').value));
+    $('startMatch').onclick = () => game.start();
 
     function renderLives(lives) {
       const box = $("livesBox");
@@ -385,9 +443,7 @@
       connected = on;
       $("connBox").classList.toggle("live", on);
       $("connText").textContent = text;
-      const lobbyish = game.state === "lobby";
-      $("lobby").style.display = lobbyish && !on ? "flex" : "none";
-      $("ready").style.display = lobbyish && on ? "flex" : "none";
+      renderMatch(latestHud);
     }
 
     try {
@@ -419,13 +475,16 @@
         },
         // TRANSPORT: every blade sample the phone sends arrives here.
         onBlade(pid, sample) {
+          if (!slots.has(pid)) return;
           game.input(pid, sample, slots.get(pid) || 0);
         },
         onCmd(pid, type) {
+          if (!slots.has(pid)) return;
           if (type === "start" && (game.state === "lobby" || game.state === "over")) game.start();
           else if (type === "again" && game.state === "over") game.start();
         },
       });
+      host.setHud(latestHud);
       $("launchScreen").style.display = 'none';
       if (launch) history.replaceState(null, '', location.pathname + location.search);
 

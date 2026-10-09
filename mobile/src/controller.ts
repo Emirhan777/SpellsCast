@@ -3,6 +3,7 @@ import { getDatabase, ref, get, set, remove, onValue, onDisconnect, runTransacti
 import { firebaseConfig } from '../../firebase-config';
 import { GAME_ID, parseRoom, claimPlayer, type Hud, type Point } from './protocol';
 import { createWandSender } from '../../game/wand-stream';
+import { controllerHud } from '../../game/match';
 
 const db = getDatabase(getApps().length ? getApp() : initializeApp(firebaseConfig));
 export type Controller = { send: (sample: Point) => void; command: (type: 'start' | 'center') => void; destroy: () => void };
@@ -53,7 +54,8 @@ export async function joinRoom(code: string, callbacks: Callbacks, signal: Abort
     const current = await get(ref(db, base + '/createdAt'));
     active();
     if (current.val() !== room.createdAt) throw new Error('The big screen changed rooms. Scan its new QR.');
-    offs.push(onValue(ref(db, base + '/hud'), s => callbacks.onHud(s.val() || {})));
+    const slot = result.snapshot.val()[pid].slot;
+    offs.push(onValue(ref(db, base + '/hud'), s => callbacks.onHud(controllerHud(s.val() || {}, pid, slot))));
     offs.push(onValue(ref(db, base + '/status'), s => callbacks.onStatus(s.val() || 'lobby')));
     offs.push(onValue(ref(db, base + '/createdAt'), s => {
       if (s.val() !== room.createdAt) closed('The big screen closed this room. Scan the new QR to reconnect.');

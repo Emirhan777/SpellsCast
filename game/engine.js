@@ -23,6 +23,7 @@ import { TARGETS, randomTarget, drawTarget, defeatFor } from "./targets.js";
 import { SPELLS, recognize, drawGlyph } from "./spells.js";
 import { createBlade } from "./blade.js";
 import { sound } from "./audio.js";
+import { DUEL_DURATIONS, DEFAULT_DUEL_SECONDS, duelResult } from "./match.js";
 
 const BEST_KEY = "spellscast.best";
 
@@ -54,6 +55,10 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
   let raf = 0, lastFrame = 0;
   let lastCast = null;          // what the HUD echoes to the phone
   let lastCountN = -1;
+  let mode = 'solo', duration = DEFAULT_DUEL_SECONDS;
+  let matchStartsAt = 0, matchEndsAt = 0, timeLeft = duration;
+  let winnerSlot = -1, result = '', matchNotice = '';
+  let wizards = [];
 
   const blades = new Map();     // pid -> blade
   const targets = [];
@@ -204,7 +209,12 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
     return best;
   }
 
-  function resolveCast(blade, stroke, now) {
+  function resolveCast(blade, stroke, now, pid) {
+    if (mode === 'duel') {
+      if (state !== 'playing' || !wizards.some(w => w.pid === pid)) return;
+      if (now >= matchEndsAt) { gameOver(); return; }
+    }
+    const castReport = o => report({ ...o, pid });
     const res = recognize(stroke);
     const end = stroke && stroke.length ? stroke[stroke.length - 1] : blade.position;
     const ex = end.x * W, ey = end.y * H;
@@ -217,10 +227,10 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
       // a cast that silently failed, and this is the one screen where the player
       // is already suspicious that their gestures are not landing.
       if (res.spell) {
-        report({ ok: true, spell: res.spell.id, name: res.spell.name, score: 0 });
+        castReport({ ok: true, spell: res.spell.id, name: res.spell.name, score: 0 });
         start();
       } else if (res.reason === "misfire") {
-        report({ ok: false, reason: "misfire", near: res.runnerUp?.name || null });
+        castReport({ ok: false, reason: "misfire", near: res.runnerUp?.name || null });
       }
       return;
     }
@@ -230,7 +240,7 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
       // is a real attempt and deserves to be named.
       if (res.reason === "misfire") {
         announce(null, "MISFIRE", ex, ey, "#ff8a8a");
-        report({ ok: false, reason: "misfire", near: res.runnerUp?.name || null });
+        castReport({ ok: false, reason: "misfire", near: res.runnerUp?.name || null });
         combo = 0;
         publishHud();
       }
@@ -246,7 +256,7 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
       const wrong = nearestAny(ex, ey);
       if (wrong) wrong.hitFlash = 1;
       announce(spell, spell.name.toUpperCase(), ex, ey, spell.color, "no target");
-      report({ ok: false, reason: "no-target", spell: spell.id, name: spell.name });
+      castReport({ ok: false, reason: "no-target", spell: spell.id, name: spell.name });
       if (state === "playing") { combo = 0; publishHud(); }
       sound.castBolt(spell.id);
       return;
@@ -262,7 +272,7 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
 
     if (state !== "playing") {
       announce(spell, spell.name.toUpperCase(), hit.x, hit.y - hit.r, spell.color);
-      report({ ok: true, spell: spell.id, name: spell.name, score: 0 });
+      castReport({ ok: true, spell: spell.id, name: spell.name, score: 0 });
       // One successful cast in the lobby IS the start button. It is a better
       // gate than a button: it proves the wand is tracking, that the player has
       // found a rune, and that the phone's cast pad is wired up - all the things
@@ -271,15 +281,16 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
       return;
     }
 
-    combo = now - lastCastAt < COMBO_MS ? combo + 1 : 1;
+    combo = mode === 'duel' ? 1 : now - lastCastAt < COMBO_MS ? combo + 1 : 1;
     lastCastAt = now;
     const mult = Math.min(combo, 5);
-    const gained = spell.score * mult;
+    const gained = mode === 'duel' ? 1 : spell.score * mult;
     score += gained;
+    if (mode === 'duel') wizards.find(w => w.pid === pid).score += gained;
     if (mult > 1) sound.combo(mult);
     announce(spell, spell.name.toUpperCase(), hit.x, hit.y - hit.r, spell.color,
-      "+" + gained + (mult > 1 ? "   x" + mult : ""));
-    report({ ok: true, spell: spell.id, name: spell.name, score: gained, combo: mult });
+      "+" + gained + (mode === 'duel' ? `   WIZARD ${blade.slot + 1}` : mult > 1 ? "   x" + mult : ""));
+    castReport({ ok: true, spell: spell.id, name: spell.name, score: gained, combo: mult });
     publishHud();
   }
 
@@ -333,6 +344,10 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
     onHud?.({
       score, best: Math.max(best, score), lives, combo, status: state,
       spell: lastCast?.name || "", castOk: lastCast?.ok ?? null,
+      castPid: lastCast?.pid || '', mode, duration, timeLeft, winnerSlot, result, matchNotice,
+      matchReady: blades.size === 2 && new Set([...blades.values()].map(b => b.slot)).size === 2,
+      wizards: (wizards.length ? wizards : [...blades].map(([pid, b]) => ({ pid, slot: b.slot, score: 0 })))
+        .map(w => ({ ...w })),
     });
   }
   function setState(s) {
@@ -348,17 +363,28 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
   }
 
   function start() {
+    if (mode === 'duel' && (state === 'playing' || state === 'countdown')) return false;
+    if (mode === 'duel' && (blades.size !== 2 || new Set([...blades.values()].map(b => b.slot)).size !== 2)) return false;
     clearBoard();
     score = 0; lives = START_LIVES; combo = 0; lastCast = null;
     waveNo = 0; waveTimer = 0.4; countdownLeft = 3.2;
     shake = 0; flash = 0;
+    wizards = [...blades].map(([pid, b]) => ({ pid, slot: b.slot, score: 0 })).sort((a, b) => a.slot - b.slot);
+    matchStartsAt = performance.now() + 3200;
+    matchEndsAt = matchStartsAt + duration * 1000;
+    timeLeft = duration; winnerSlot = -1; result = ''; matchNotice = ''; lastCountN = -1;
     for (const b of blades.values()) b.reset();
     setState("countdown");
+    return true;
   }
 
   function gameOver() {
     if (state === "over") return;
-    if (score > best) { best = score; saveBest(best); }
+    if (mode === 'duel') {
+      ({ winnerSlot, result } = duelResult(wizards));
+      timeLeft = 0;
+      pending.length = 0;
+    } else if (score > best) { best = score; saveBest(best); }
     setState("over");
     sound.gameOver();
   }
@@ -368,11 +394,19 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
   // -------------------------------------------------------------------------
   function update(dt, now) {
     const g = GRAVITY * H;
+    if (mode === 'duel' && (state === 'playing' || state === 'countdown')) {
+      if (now >= matchEndsAt) gameOver();
+      else {
+        if (state === 'countdown') countdownLeft = Math.max(0, (matchStartsAt - now) / 1000);
+        const remaining = Math.ceil(Math.max(0, matchEndsAt - Math.max(now, matchStartsAt)) / 1000);
+        if (remaining !== timeLeft) { timeLeft = remaining; publishHud(); }
+      }
+    }
 
-    for (const b of blades.values()) {
+    for (const [pid, b] of blades) {
       b.step(dt, now);
       const stroke = b.takeStroke();
-      if (stroke) resolveCast(b, stroke, now);
+      if (stroke) resolveCast(b, stroke, now, pid);
     }
 
     if (state === "countdown") {
@@ -381,7 +415,7 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
         lastCountN = n;
         sound.countdown(n);
       }
-      countdownLeft -= dt;
+      if (mode !== 'duel') countdownLeft -= dt;
       if (countdownLeft <= 0) setState("playing");
     }
 
@@ -442,7 +476,7 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
       const offSide = t.x < -t.r * 4 || t.x > W + t.r * 4;
       if (belowBottom || offSide) {
         targets.splice(i, 1);
-        if (belowBottom && state === "playing") {
+        if (belowBottom && state === "playing" && mode !== 'duel') {
           lives--;
           combo = 0;
           shake = Math.max(shake, 0.5);
@@ -625,6 +659,19 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
     ctx.fillRect(-H, -H, W + H * 2, H * 3);
     ctx.textAlign = "center";
 
+    if (mode === 'duel') {
+      ctx.fillStyle = '#ffe27a';
+      ctx.font = `900 ${Math.round(H * 0.08)}px system-ui`;
+      ctx.fillText(result, W / 2, H * 0.34);
+      ctx.fillStyle = '#fff';
+      ctx.font = `800 ${Math.round(H * 0.045)}px system-ui`;
+      ctx.fillText(wizards.map(w => `Wizard ${w.slot + 1}: ${w.score}`).join('     ·     '), W / 2, H * 0.46);
+      ctx.font = `600 ${Math.round(H * 0.025)}px system-ui`;
+      ctx.fillText('Choose Rematch on the screen or Start game on your phone', W / 2, H * 0.57);
+      ctx.restore();
+      return;
+    }
+
     ctx.fillStyle = "#fff";
     ctx.font = "900 " + Math.round(H * 0.09) + "px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
     ctx.fillText("WAND DOWN", W / 2, H * 0.26);
@@ -681,17 +728,37 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
     get width() { return W; },
     get height() { return H; },
     get lastCast() { return lastCast; },
+    get mode() { return mode; },
+    get hud() { return { mode, timeLeft, wizards: wizards.map(w => ({ ...w })), winnerSlot, result }; },
 
-    addPlayer(pid, slot) { ensureBlade(pid, slot); },
-    removePlayer(pid) { blades.delete(pid); },
+    addPlayer(pid, slot) { ensureBlade(pid, slot); publishHud(); },
+    removePlayer(pid) {
+      blades.delete(pid);
+      if (mode === 'duel' && wizards.some(w => w.pid === pid) && (state === 'countdown' || state === 'playing')) {
+        this.lobby(); matchNotice = 'A wizard disconnected. Rejoin to start a new duel.';
+      }
+      publishHud();
+    },
     hasPlayer(pid) { return blades.has(pid); },
     get playerCount() { return blades.size; },
 
     // A sample off the wire: carries velocity, so it gets extrapolated, and the
     // cast flag, which is what opens and closes a stroke.
-    input(pid, sample, slot = 0) { ensureBlade(pid, slot).feed(sample); },
+    input(pid, sample, slot = 0) {
+      const b = ensureBlade(pid, slot); b.feed(sample);
+      // Resolve releases as they arrive, so frame iteration never favors slot 0.
+      const stroke = b.takeStroke(); if (stroke) resolveCast(b, stroke, performance.now(), pid);
+    },
     // Local input (the screen's own mouse): no lag, no prediction.
-    inputLocal(pid, x, y, cast = false, slot = 0) { ensureBlade(pid, slot).feedDirect(x, y, cast); },
+    inputLocal(pid, x, y, cast = false, slot = 0) {
+      const b = ensureBlade(pid, slot); b.feedDirect(x, y, cast);
+      const stroke = b.takeStroke(); if (stroke) resolveCast(b, stroke, performance.now(), pid);
+    },
+
+    configureMatch(nextMode, seconds = duration) {
+      if (!['solo', 'duel'].includes(nextMode) || !DUEL_DURATIONS.includes(seconds) || !['lobby', 'over'].includes(state)) return false;
+      mode = nextMode; duration = seconds; this.lobby(); return true;
+    },
 
     start,
     gameOver,
@@ -699,9 +766,11 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
     // Back to the QR screen - the last phone hung up.
     lobby() {
       clearBoard();
+      wizards = []; score = 0; result = ''; winnerSlot = -1; timeLeft = duration; matchNotice = '';
       combo = 0; lastCast = null;
       waveTimer = 0.6; waveNo = 0;
       setState("lobby");
+      publishHud();
     },
 
     sound,

@@ -22,6 +22,13 @@ The Expo QR opens the app. The game QR pairs your wand. The tunnel URL is tempor
 
 Sound and music play on the big screen. Click the big screen once to enable its audio.
 
+For a timed two-player match, select **Wizard duel** and its length on the big
+screen, then join the same QR/room from both phones. The updated controller shows
+your wizard number, your score, the opponent's score, time remaining and the
+winner. Tap **Start duel** once both wizards are connected, or **Rematch** after
+the result. This native source needs a new build to update an installed app;
+the existing uploaded 1.0.1 (5) binary predates the duel HUD.
+
 ## Start a game from the app
 
 Choose **Start a game** on the home screen:

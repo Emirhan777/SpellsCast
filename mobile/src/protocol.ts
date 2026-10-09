@@ -1,3 +1,5 @@
+import { claimPlayerSlot } from '../../game/match';
+
 export const GAME_URL = 'https://emirhan777.github.io/SpellsCast/';
 export const GAME_ID = 'spellscast';
 export const MAX_PLAYERS = 2;
@@ -20,15 +22,10 @@ export function parseRoom(input: string): string {
 }
 
 export type Point = { x: number; y: number; vx?: number; vy?: number; cast?: boolean };
-export type Hud = { score?: number; best?: number; lives?: number; combo?: number; spell?: string; castOk?: boolean; status?: string };
+export type Hud = { score?: number; best?: number; lives?: number; combo?: number; spell?: string; castOk?: boolean | null; status?: string;
+  mode?: string; timeLeft?: number; opponentScore?: number; wizardNumber?: number; result?: string; matchReady?: boolean };
 
 // Pure transaction callback; the native controllers cannot claim the same slot.
 export function claimPlayer(players: Record<string, { slot: number }> | null, pid: string) {
-  const current = players || {};
-  if (current[pid]) return current;
-  const taken = new Set(Object.values(current).map(p => p?.slot));
-  let slot = 0;
-  while (taken.has(slot) && slot < MAX_PLAYERS) slot++;
-  if (slot >= MAX_PLAYERS) return undefined;
-  return { ...current, [pid]: { slot, joinedAt: { '.sv': 'timestamp' } } };
+  return claimPlayerSlot(players, pid);
 }

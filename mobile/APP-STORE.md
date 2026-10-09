@@ -1,5 +1,9 @@
 # App Store release preparation
 
+## Multiplayer source update (October 9, 2026)
+
+The browser now offers **Wizard duel** with two separate wizard scores and 60, 90, 120 or 180-second matches. The first correct cast received by the host claims a target for one point; the highest score wins when time expires, with ties shown as draws. The native source displays each player's own score, opponent score, timer and result. Reload Expo Go to test it. Uploaded version **1.0.1 (5)** predates these native changes; a new production build is required to deliver the duel HUD to installed iPhone apps.
+
 ## Wand responsiveness update (September 25, 2026)
 
 The source now shares a 16 ms movement sender with the browser controller, flushes the last pending position when movement stops, and limits link-pairing subscriptions to launch data. Cast press/release events send immediately. Automated steadiness, spell recognition, live Firebase and shared-link checks pass; physical iPhone latency still needs testing.

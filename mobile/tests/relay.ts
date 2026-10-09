@@ -15,9 +15,9 @@ const pause=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
 try {
  do {code=String(Math.floor(100000+Math.random()*900000));room=ref(db,'rooms/'+code);} while((await get(room)).exists());
  await set(room,{game:'spellscast',createdAt:Date.now(),status:'lobby'});
- let hud:any={},status='',closed='';
+ let hud:any={},otherHud:any={},status='',closed='';
  const a=await joinRoom(code,{onHud:v=>hud=v,onStatus:v=>status=v,onClosed:v=>closed=v},new AbortController().signal);sessions.push(a);
- const b=await joinRoom(code,{onHud(){},onStatus(){},onClosed(){}},new AbortController().signal);sessions.push(b);
+ const b=await joinRoom(code,{onHud:v=>otherHud=v,onStatus(){},onClosed(){}},new AbortController().signal);sessions.push(b);
  await assert.rejects(joinRoom(code,{onHud(){},onStatus(){},onClosed(){}},new AbortController().signal),/two wands/);
  a.send({x:.2,y:.3,cast:true});a.send({x:.8,y:.7,cast:false});a.command('start');
  await set(ref(db,`rooms/${code}/hud`),{score:25,lives:2,spell:'Banish',castOk:true});
@@ -30,6 +30,14 @@ try {
  assert.equal((Object.values(value.input)[0] as any).x,.8);
  assert.equal((Object.values(value.cmd)[0] as any).type,'start');
  assert.equal(hud.score,25);assert.equal(status,'playing');
+ const entries=Object.entries(value.players) as [string,{slot:number}][];
+ const wizardA=entries.find(([,p])=>p.slot===0)![0], wizardB=entries.find(([,p])=>p.slot===1)![0];
+ await set(ref(db,`rooms/${code}/hud`),{mode:'duel',score:7,timeLeft:30,matchReady:true,
+  wizards:[{pid:wizardA,slot:0,score:2},{pid:wizardB,slot:1,score:5}],castPid:wizardB,spell:'Expel',castOk:true});
+ await pause(300);
+ assert.equal(hud.score,2);assert.equal(hud.opponentScore,5);assert.equal(hud.wizardNumber,1);
+ assert.equal(hud.spell,'');assert.equal(otherHud.score,5);assert.equal(otherHud.spell,'Expel');
+ assert.equal(otherHud.timeLeft,30);
  // A final movement inside the throttle must reach the real backend without a heartbeat.
  a.send({x:.25,y:.4}); a.send({x:.75,y:.6});
  await pause(200);
@@ -48,7 +56,7 @@ try {
  await pause(200); assert.equal(readyCount,1,'pairing must not receive movement/HUD updates');
  await ticket.cancel(); assert.ok((await get(launchRoom)).exists(),'closing setup must preserve the claimed game');
  await remove(launchRoom); await pause(300); assert.equal(failureCount,1);
- console.log('PASS live relay: slots, capacity, cast release, final movement, HUD, host closure, link pairing isolation and cleanup');
+ console.log('PASS live relay: slots, capacity, cast release, final movement, personal duel scores and feedback, host closure, link pairing isolation and cleanup');
 } finally {stopWatching?.();sessions.forEach(s=>s.destroy());if(room)await remove(room);if(launchRoom)await remove(launchRoom);await deleteApp(app);}
 process.exit(0);
 }

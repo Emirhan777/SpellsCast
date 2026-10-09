@@ -322,10 +322,21 @@ garbage-collects `rooms/`, because other projects live in that tree too.
 
 ## Two players
 
-The wire format is already per-player and the engine renders one wand per slot in
-a second colour. `MAX_SLOTS` in `game/net.js` is 2, so a second phone scanning the
-same QR gets its own wand — and its own casts. A target is claimed the instant a
-bolt is fired at it, so two wands cannot both score the same Rogue Mage.
+Choose **Wizard duel · 2 players** on the big screen, select a match length
+(60, 90, 120 or 180 seconds), and scan the same QR on both phones. Wizard 1 has
+a blue wand; Wizard 2 has a pink wand. Both must connect before **Start duel**
+becomes available. The phones can also start the duel after both have joined.
+
+After the countdown, the first correct cast received by the host claims its
+target and earns **one point** for that wizard. A claimed target cannot award a
+second point. Each wizard has a separate score; misses do not remove lives, so
+the duel lasts until the timer expires. Highest score wins; equal scores draw.
+The timer follows elapsed time even if the screen tab is backgrounded. Choose
+**Rematch** to reset both scores. A wizard disconnecting cancels the current
+duel, and both must be connected again before a fresh match can begin.
+
+**Classic** keeps the original shared score and three-life game. Browser and
+native controllers share the same atomic slot claims and duel HUD formatting.
 
 ## Deploy
 
