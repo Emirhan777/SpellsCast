@@ -34,6 +34,7 @@ function drawBoth() {
 const release = pid => game.inputLocal(pid, .78, .2, false, pid === 'a' ? 0 : 1);
 
 game.configureMatch('duel', 60);
+assert.equal(game.setPaused(true), false, 'online duel cannot pause its deadline');
 game.addPlayer('a', 0);
 assert.equal(game.start(), false, 'one wizard cannot start a duel');
 game.addPlayer('b', 1);
@@ -80,5 +81,15 @@ const second = claimPlayerSlot(first, 'b');
 assert.equal(second.b.slot, 1); assert.equal(claimPlayerSlot(second, 'c'), undefined);
 const personal = controllerHud({mode:'duel',wizards:second,castPid:'b',spell:'Expel'},'a',0);
 assert.equal(personal.spell, '', 'another wizard cast cannot trigger your feedback');
+game.lobby(); game.configureMatch('solo', 60); game.start();
+game.setPaused(true); tick(250);
+assert.equal(game.state, 'countdown', 'local countdown freezes while paused');
+game.setPaused(false); tick(250);
+assert.equal(game.state, 'playing');
+const soloLives = game.lives;
+game.setPaused(true); tick(4000);
+assert.equal(game.lives, soloLives, 'local play cannot lose lives while paused');
+game.setPaused(false); tick(1000);
+assert.equal(game.state, 'over', 'local play advances again after resuming');
 game.destroy();
 console.log('PASS duel: first arrival, one point per target, separate scores, deadline, tie, rematch, disconnect, player slots and personal HUD.');

@@ -2,6 +2,29 @@
 
 A native Expo / React Native wand controller for the [SpellsCast browser game](https://emirhan777.github.io/SpellsCast/). Expo SDK 57, iOS 16.4 or later.
 
+## Play on this device
+
+Choose **Play on this device** on the home screen or under **Start a game**.
+The full Classic game runs locally, with targets above and a touch drawing pad
+below. Draw a target's rune and lift to cast. Score, lives, pause/resume, sound
+effects and replay are included. No QR, second device, Firebase room or internet
+connection is needed for this mode. Wizard duel remains a separate-screen mode.
+
+Tap **Mirror screen** for AirPlay and HDMI instructions. On iOS, open Control
+Center → Screen Mirroring and choose a compatible TV, Apple TV or Mac. Return to
+the app and tap **Resume game**. The TV mirrors the entire phone layout, including
+the drawing pad; input stays on the phone. Mirroring is started by iOS, not an
+in-app share sheet. Wireless mirroring can introduce display delay. Gameplay
+pauses when opening the guide or leaving the foreground; interrupted strokes
+are discarded without casting.
+
+This feature is source-only until a new iOS binary is built and released; it
+is not included in version 1.1.0 (6).
+
+The offline HTML is bundled from the shared game engine. After changing game
+code, run `npm run build:device-game`; `npm run check:device-game` checks that the
+committed bundle matches its source. The production build hook regenerates it.
+
 ## Try it in Expo Go
 
 From this directory:
@@ -14,7 +37,7 @@ npx expo start --go --tunnel
 1. Install an Expo Go build compatible with SDK 57 on your iPhone: https://expo.dev/go.
 2. Sign in to Expo Go with the same Expo account used by the CLI (`npx expo whoami`).
 3. Scan the **terminal QR** with the iPhone Camera to open SpellsCast in Expo Go.
-4. Open the browser game on a **different screen**.
+4. Choose **Play on this device** to play locally. For connected play, open the browser game on a **different screen**.
 5. Inside SpellsCast, choose **Join an existing game**, then **Scan the game QR** and scan that screen's QR. Or enter the six-digit room code.
 6. Choose motion or touch controls. Hold the cast pad, draw a rune, and release.
 

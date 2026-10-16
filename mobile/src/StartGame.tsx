@@ -12,7 +12,7 @@ function Action({ title, onPress, disabled = false, primary = false, testID }: {
   </Pressable>;
 }
 
-export default function StartGame({ foreground, onConnect, onJoin, onBack }: { foreground: boolean; onConnect: (code: string) => void; onJoin: () => void; onBack: () => void }) {
+export default function StartGame({ foreground, onDevice, onConnect, onJoin, onBack }: { foreground: boolean; onDevice: () => void; onConnect: (code: string) => void; onJoin: () => void; onBack: () => void }) {
   const [ticket, setTicket] = useState<Launch | null>(null);
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
@@ -76,7 +76,12 @@ export default function StartGame({ foreground, onConnect, onJoin, onBack }: { f
   return <View style={styles.content}>
     <Action title="Back" onPress={onBack} />
     <Text accessibilityRole="header" style={styles.title}>Start a game</Text>
-    <Text style={styles.description}>Choose how to open the game on another screen. Your iPhone stays your wand.</Text>
+    <Text style={styles.description}>Play here on your phone, or open the game on another screen and use your iPhone as the wand.</Text>
+    <View style={styles.card}>
+      <Text accessibilityRole="header" style={styles.heading}>Play on this device</Text>
+      <Text style={styles.description}>The game and touch controls share your phone screen. No room or internet needed. Use Mirror screen in the game to see how to share it with your TV.</Text>
+      <Action title="Play on this device" primary testID="start-device-game" onPress={onDevice} />
+    </View>
     {!!notice && <Text accessibilityLiveRegion="polite" style={styles.status}>{notice}</Text>}
 
     <View style={styles.card}>

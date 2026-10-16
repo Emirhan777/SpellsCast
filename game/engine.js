@@ -52,7 +52,7 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
   let countdownLeft = 0;
   let waveTimer = 0, waveNo = 0;
   let shake = 0, flash = 0, flashColor = "255,240,210";
-  let raf = 0, lastFrame = 0;
+  let raf = 0, lastFrame = 0, paused = false;
   let lastCast = null;          // what the HUD echoes to the phone
   let lastCountN = -1;
   let mode = 'solo', duration = DEFAULT_DUEL_SECONDS;
@@ -713,6 +713,7 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
     // A backgrounded tab hands back a huge dt; cap it so nothing teleports.
     const dt = Math.min((now - lastFrame) / 1000 || 0, 0.05);
     lastFrame = now;
+    if (paused) return;
     update(dt, now);
     render(now);
   }
@@ -751,6 +752,7 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
     },
     // Local input (the screen's own mouse): no lag, no prediction.
     inputLocal(pid, x, y, cast = false, slot = 0) {
+      if (paused) return;
       const b = ensureBlade(pid, slot); b.feedDirect(x, y, cast);
       const stroke = b.takeStroke(); if (stroke) resolveCast(b, stroke, performance.now(), pid);
     },
@@ -760,6 +762,12 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
       mode = nextMode; duration = seconds; this.lobby(); return true;
     },
 
+    // Local solo play can pause when opening Control Center to mirror the screen.
+    // Online duels keep their absolute deadline and cannot pause.
+    setPaused(next) {
+      if (mode !== 'solo') return false;
+      paused = !!next; lastFrame = performance.now(); return true;
+    },
     start,
     gameOver,
     restart: start,

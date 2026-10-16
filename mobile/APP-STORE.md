@@ -1,5 +1,11 @@
 # App Store release preparation
 
+## Unreleased on-device play (October 16, 2026)
+
+The source includes **Play on this device** on the home screen and under Start a game. It runs the shared Classic game offline inside the app, with touch casting, score, lives, sound effects, pause/resume and replay. **Mirror screen** explains iOS Control Center → Screen Mirroring (AirPlay), plus HDMI. Mirroring shows the full phone layout; it does not create a separate TV controller layout. Opening the guide or backgrounding pauses local play and discards an interrupted cast.
+
+This feature is **not in 1.1.0 (6)** and has not been uploaded or submitted to Apple. A new native build is needed because `react-native-webview` was added. Expo Go includes this module. Physical iPhone/AirPlay/HDMI testing remains necessary before a store release.
+
 ## Current release status (October 9, 2026)
 
 - Apple confirms **1.0.1 (5)** is the currently published release.
