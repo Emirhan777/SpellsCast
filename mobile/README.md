@@ -5,25 +5,36 @@ A native Expo / React Native wand controller for the [SpellsCast browser game](h
 ## Play on this device
 
 Choose **Play on this device** on the home screen or under **Start a game**.
-The full Classic game runs locally, with targets above and a touch drawing pad
-below. Draw a target's rune and lift to cast. Score, lives, pause/resume, sound
-effects and replay are included. No QR, second device, Firebase room or internet
-connection is needed for this mode. Wizard duel remains a separate-screen mode.
+The Classic game fills the landscape screen. There is no separate drawing pad.
+Menus and the online wand controller remain portrait.
 
-Tap **Mirror screen** for AirPlay and HDMI instructions. On iOS, open Control
-Center → Screen Mirroring and choose a compatible TV, Apple TV or Mac. Return to
-the app and tap **Resume game**. The TV mirrors the entire phone layout, including
-the drawing pad; input stays on the phone. Mirroring is started by iOS, not an
-in-app share sheet. Wireless mirroring can introduce display delay. Gameplay
-pauses when opening the guide or leaving the foreground; interrupted strokes
-are discarded without casting.
+- **Tilt mode** is selected by default. Tap **Start Tilt game**, allow motion,
+  hold **HOLD TO CAST**, tilt the phone through a rune, then release. The starting
+  pose centers the wand; use **Center wand** to recenter. Screen-up tilt uses the
+  landscape sensor axis. Motion denial leaves Tilt selected and offers an
+  explicit switch to Finger mode.
+- **Finger mode** draws directly on the game screen. Lift to cast. Selecting a
+  different mode during a round asks to end the run and reset the score.
+- **Tilt best** and **Finger best** are independent. Best scores save as you earn
+  points, including when leaving or switching mid-run. The iOS app persists them
+  in local device storage; the web preview uses browser storage. Existing Classic
+  and online scores are not imported into either mode.
 
-This feature is source-only until a new iOS binary is built and released; it
-is not included in version 1.1.0 (6).
+Tap **Mirror** for AirPlay and HDMI instructions. On iOS, open Control Center ?
+Screen Mirroring and choose a compatible screen. Return to SpellsCast and tap
+**Resume game**. Tilt recenters on resume. The TV mirrors the landscape game;
+its borders depend on the TV aspect ratio and mirroring settings. Wireless
+mirroring may add display delay. Local play pauses while opening the guide or
+leaving the foreground, and interrupted strokes do not cast.
 
-The offline HTML is bundled from the shared game engine. After changing game
-code, run `npm run build:device-game`; `npm run check:device-game` checks that the
-committed bundle matches its source. The production build hook regenerates it.
+No QR, room, second device or internet is needed for local play. Wizard duel
+remains a separate-screen mode. This feature is source-only until a new native
+binary is released; version 1.1.0 (6) does not include it. Expo Go supports the
+required modules. Test both landscape motion and mirroring on a physical iPhone.
+
+After changing game code, run `npm run build:device-game`;
+`npm run check:device-game` verifies the generated bundle. Production builds
+regenerate the offline bundle automatically.
 
 ## Try it in Expo Go
 

@@ -39,15 +39,15 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 
-const loadBest = () => { try { return parseInt(localStorage.getItem(BEST_KEY), 10) || 0; } catch { return 0; } };
-const saveBest = (v) => { try { localStorage.setItem(BEST_KEY, String(v)); } catch {} };
+const loadBest = (key) => { try { return parseInt(localStorage.getItem(key), 10) || 0; } catch { return 0; } };
+const saveBest = (v, key) => { try { localStorage.setItem(key, String(v)); } catch {} };
 
-export function createGame(canvas, { onHud, onState, onCast } = {}) {
+export function createGame(canvas, { onHud, onState, onCast, bestKey = BEST_KEY, initialBest } = {}) {
   const ctx = canvas.getContext("2d");
   let W = 0, H = 0, dpr = 1;
 
   let state = "lobby";          // lobby | countdown | playing | over
-  let score = 0, lives = START_LIVES, best = loadBest();
+  let score = 0, lives = START_LIVES, best = initialBest ?? loadBest(bestKey);
   let combo = 0, lastCastAt = 0;
   let countdownLeft = 0;
   let waveTimer = 0, waveNo = 0;
@@ -384,7 +384,7 @@ export function createGame(canvas, { onHud, onState, onCast } = {}) {
       ({ winnerSlot, result } = duelResult(wizards));
       timeLeft = 0;
       pending.length = 0;
-    } else if (score > best) { best = score; saveBest(best); }
+    } else if (score > best) { best = score; saveBest(best, bestKey); }
     setState("over");
     sound.gameOver();
   }

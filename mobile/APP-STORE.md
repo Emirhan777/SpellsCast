@@ -1,10 +1,12 @@
 # App Store release preparation
 
-## Unreleased on-device play (October 16, 2026)
+## Unreleased landscape play (October 20, 2026)
 
-The source includes **Play on this device** on the home screen and under Start a game. It runs the shared Classic game offline inside the app, with touch casting, score, lives, sound effects, pause/resume and replay. **Mirror screen** explains iOS Control Center → Screen Mirroring (AirPlay), plus HDMI. Mirroring shows the full phone layout; it does not create a separate TV controller layout. Opening the guide or backgrounding pauses local play and discards an interrupted cast.
+**Play on this device** now opens a full-screen landscape game. **Tilt** is the default mode: hold the cast button, tilt through a rune, then release; Center wand recalibrates. **Finger** mode draws directly on the game canvas. Switching modes starts a new round after confirmation. Tilt best and Finger best save independently in local device storage, including points earned before leaving or switching modes. Online Classic/duel scores remain separate.
 
-This feature is **not in 1.1.0 (6)** and has not been uploaded or submitted to Apple. A new native build is needed because `react-native-webview` was added. Expo Go includes this module. Physical iPhone/AirPlay/HDMI testing remains necessary before a store release.
+Mirror opens the AirPlay/HDMI guide. The TV mirrors the landscape game; display borders depend on its aspect ratio and mirroring settings. Backgrounding pauses local play and discards incomplete strokes. The game screen hides the status bar; menus and online controller remain portrait.
+
+This update has **not been uploaded or submitted to Apple** and is not in 1.1.0 (6). It requires a new native build for WebView, AsyncStorage and landscape orientation support. Expo Go can test the source. Native lint, typecheck, unit tests, iOS bundle export and simulated landscape casting/mode isolation checks pass. Physical iPhone motion direction and AirPlay/HDMI still need verification.
 
 ## Current release status (October 9, 2026)
 

@@ -79,7 +79,7 @@ export default function StartGame({ foreground, onDevice, onConnect, onJoin, onB
     <Text style={styles.description}>Play here on your phone, or open the game on another screen and use your iPhone as the wand.</Text>
     <View style={styles.card}>
       <Text accessibilityRole="header" style={styles.heading}>Play on this device</Text>
-      <Text style={styles.description}>The game and touch controls share your phone screen. No room or internet needed. Use Mirror screen in the game to see how to share it with your TV.</Text>
+      <Text style={styles.description}>Play full-screen in landscape. Tilt to cast, or choose Finger mode and draw directly on the game. Each mode keeps its own best. Use Mirror to set up your TV.</Text>
       <Action title="Play on this device" primary testID="start-device-game" onPress={onDevice} />
     </View>
     {!!notice && <Text accessibilityLiveRegion="polite" style={styles.status}>{notice}</Text>}

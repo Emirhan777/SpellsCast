@@ -13,10 +13,9 @@ import { joinRoom, type Controller } from './controller';
 import { GAME_URL, parseRoom, type Hud, type Point } from './protocol';
 import { useWand } from './useWand';
 import StartGame from './StartGame';
-import DeviceGame from './DeviceGame';
 
 const GOLD = '#eed297', DIM = '#a79eb8';
-type Phase = 'home' | 'start' | 'device' | 'joining' | 'ready' | 'playing' | 'practice';
+type Phase = 'home' | 'start' | 'joining' | 'ready' | 'playing' | 'practice';
 type Spell = typeof SPELLS[number];
 const haptic = () => { void Haptics.selectionAsync().catch(() => {}); };
 
@@ -236,13 +235,13 @@ export default function SpellsCast() {
     {active && foreground && <Awake />}
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      {phase === 'device' ? <DeviceGame foreground={foreground} onBack={leave} /> : !active ? <ScrollView contentContainerStyle={styles.home} keyboardShouldPersistTaps="handled">
+      {!active ? <ScrollView contentContainerStyle={styles.home} keyboardShouldPersistTaps="handled">
         <View style={styles.wordmark}><Text style={styles.eyebrow}>SPELLSCAST</Text><Text style={styles.small}>YOUR POCKET WAND</Text></View>
         {phase !== 'start' && <View style={styles.hero}><Wand /><Text style={styles.title}>A little motion.{ '\n' }A little magic.</Text>
           <Text style={styles.description}>Play right here, or turn your iPhone into a wand for the big screen.</Text></View>}
-        {phase === 'start' && <StartGame foreground={foreground} onDevice={() => { disconnect(); setPhase('device'); }} onConnect={connect} onBack={() => setPhase('home')} onJoin={() => { setShowJoin(true); setPhase('home'); }} />}
+        {phase === 'start' && <StartGame foreground={foreground} onDevice={() => { disconnect(); router.push('/device-game'); }} onConnect={connect} onBack={() => setPhase('home')} onJoin={() => { setShowJoin(true); setPhase('home'); }} />}
         {phase === 'home' && <>
-          <Button title="Play on this device" testID="play-device-button" onPress={() => { disconnect(); setError(''); setPhase('device'); }} />
+          <Button title="Play on this device" testID="play-device-button" onPress={() => { disconnect(); setError(''); router.push('/device-game'); }} />
           <Text style={styles.instructions}>Play the full game here. Mirror your screen to a TV if you like.</Text>
           <Button title="Start a game" testID="start-game-button" onPress={() => { setError(''); setPhase('start'); }} />
           <Text style={styles.instructions}>Send the game to a computer or set it up on your TV.</Text>
