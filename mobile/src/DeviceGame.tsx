@@ -85,7 +85,7 @@ export default function DeviceGame({ foreground, onBack }: { foreground: boolean
       startInLoadingState renderLoading={() => <ActivityIndicator color="#eed297" style={styles.loading} />}
       onLoadEnd={() => { if (!foreground || mirror) send('pause'); }} />}
     {storageFailed && <Text style={styles.warning}>Best scores may only be saved for this session.</Text>}
-    <Modal visible={mirror} animationType="slide" supportedOrientations={['landscape-left']} onRequestClose={() => setMirror(false)}>
+    <Modal visible={mirror} animationType="slide" supportedOrientations={['landscape-right']} onRequestClose={() => setMirror(false)}>
       <SafeAreaView style={styles.root}><ScrollView contentContainerStyle={styles.guide}>
         <Text accessibilityRole="header" style={styles.heading}>Mirror your game</Text>
         <Text style={styles.text}>The whole landscape screen is the game. Tilt to cast with the hold button, or choose Finger mode to draw directly on the game. Each mode keeps its own best score.</Text>
