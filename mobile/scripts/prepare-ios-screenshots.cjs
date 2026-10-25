@@ -4,7 +4,7 @@ const path = require('node:path');
 const xcrun = args => execFileSync('xcrun', args, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
 const devices = JSON.parse(xcrun(['simctl', 'list', 'devices', 'available', '--json']));
 const all = Object.values(devices.devices).flat();
-const device = ['iPhone 17 Pro Max', 'iPhone 16 Pro Max', 'iPhone 15 Pro Max']
+const device = ['iPhone 18 Pro Max', 'iPhone 17 Pro Max', 'iPhone 16 Pro Max', 'iPhone 15 Pro Max']
   .map(name => all.find(d => d.name === name && d.isAvailable)).find(Boolean);
 if (!device) throw new Error('No supported Pro Max simulator is available: ' + all.map(d => d.name).join(', '));
 fs.mkdirSync('artifacts/screenshots', { recursive: true });
