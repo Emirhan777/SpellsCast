@@ -6,7 +6,7 @@ The source now uses Expo SDK 58 with its matching React Native, React and native
 
 ## Unreleased landscape play (October 20, 2026)
 
-**Play on this device** now opens a full-screen landscape game. **Tilt** is the default mode: hold the cast button, tilt through a rune, then release; Center wand recalibrates. **Finger** mode draws directly on the game canvas. Switching modes starts a new round after confirmation. Tilt best and Finger best save independently in local device storage, including points earned before leaving or switching modes. Online Classic/duel scores remain separate.
+**Play on this device** now opens a full-screen landscape game. **Tilt** is the default mode: hold anywhere on the game screen, tilt through a rune, then release; Center wand recalibrates. **Finger** mode draws directly on the game canvas. There is no local start button or dedicated cast button: a recognized spell starts or restarts a round. Permission approval or a tap alone does not start play. Switching modes starts a new round after confirmation. Tilt best and Finger best save independently in local device storage, including points earned before leaving or switching modes. Online Classic/duel scores remain separate.
 
 Mirror opens the AirPlay/HDMI guide. The TV mirrors the landscape game; display borders depend on its aspect ratio and mirroring settings. Backgrounding pauses local play and discards incomplete strokes. The game screen hides the status bar; menus and online controller remain portrait.
 

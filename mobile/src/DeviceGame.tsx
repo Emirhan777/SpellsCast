@@ -88,7 +88,7 @@ export default function DeviceGame({ foreground, onBack }: { foreground: boolean
     <Modal visible={mirror} animationType="slide" supportedOrientations={['landscape-right']} onRequestClose={() => setMirror(false)}>
       <SafeAreaView style={styles.root}><ScrollView contentContainerStyle={styles.guide}>
         <Text accessibilityRole="header" style={styles.heading}>Mirror your game</Text>
-        <Text style={styles.text}>The whole landscape screen is the game. Tilt to cast with the hold button, or choose Finger mode to draw directly on the game. Each mode keeps its own best score.</Text>
+        <Text style={styles.text}>Hold anywhere on the landscape game screen, tilt through a rune, then release to cast. Your first spell starts the game. Or choose Finger mode and draw directly on the screen. Each mode keeps its own best score.</Text>
         <Text style={styles.subheading}>AirPlay · iPhone or iPad</Text>
         <Text style={styles.text}>1. Connect your phone and an Apple TV, AirPlay-compatible TV, or AirPlay-enabled Mac to the same Wi-Fi network.</Text>
         <Text style={styles.text}>2. Open Control Center from the top-right corner. Tap Screen Mirroring (two overlapping rectangles), then choose your screen. Enter its AirPlay code if asked.</Text>

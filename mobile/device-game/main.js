@@ -6,6 +6,7 @@ try { stored = JSON.parse(localStorage.getItem('spellscast.device.bests.v1') || 
 const initial = window.__deviceBests || stored;
 const bests = { tilt: validScore(initial.tilt), finger: validScore(initial.finger) };
 let mode = 'tilt', game, paused = false, pointer = null, sample = { x: .5, y: .5 }, feedbackTimer, pendingMode = null, wasPaused = false, request = 0;
+let casting = false, motionEnabled = false, motionPending = false, motionSampleReady = false;
 const native = message => {
   if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(JSON.stringify(message));
   else window.parent.postMessage({ spellscast: true, ...message }, '*');
@@ -17,16 +18,16 @@ function saveBest(score) {
   try { localStorage.setItem('spellscast.device.bests.v1', JSON.stringify(bests)); } catch {}
   native({ type: 'best', mode, score });
 }
-function help() { return mode === 'tilt' ? 'Hold to cast. Tilt to draw. Release.' : 'Draw directly on the game. Lift to cast.'; }
+function help() { return mode === 'tilt' ? 'Hold anywhere. Tilt to draw. Release to cast.' : 'Draw directly on the game. Lift to cast.'; }
 function createRound() {
   game?.destroy();
-  paused = false; pointer = null;
+  paused = false; pointer = null; casting = false; motionPending = false; motionSampleReady = false;
+  document.body.classList.remove('casting');
   $('paused').hidden = true; $('confirm').hidden = true; $('intro').hidden = false;
-  $('intro').querySelector('h1').textContent = `SpellsCast · ${mode === 'tilt' ? 'Tilt' : 'Finger'}`;
-  $('instructions').textContent = mode === 'tilt' ? 'Hold the cast button, tilt your phone to draw a rune, then release. Starting centers your wand.' : 'Draw a target’s rune directly on the game screen. Lift your finger to cast.';
-  $('play').textContent = `Start ${mode === 'tilt' ? 'Tilt' : 'Finger'} game`;
+  $('intro').querySelector('h1').textContent = mode === 'tilt' ? 'Hold anywhere. Cast to begin.' : 'Draw a spell to begin.';
+  $('instructions').textContent = mode === 'tilt' ? 'Hold anywhere on the screen. Tilt your phone to draw one of the runes below, then release. Your first spell starts the game.' : 'Draw one of the runes below directly on the game screen. Lift your finger to cast. Your first spell starts the game.';
   $('notice').textContent = ''; $('feedback').textContent = help();
-  $('hold').hidden = mode !== 'tilt'; $('center').hidden = mode !== 'tilt'; $('hold').classList.remove('casting');
+  $('center').hidden = mode !== 'tilt';
   $('mode').value = mode;
   game = createGame($('game'), {
     bestKey: `spellscast.device.best.${mode}`, initialBest: bests[mode],
@@ -37,12 +38,19 @@ function createRound() {
     },
     onState(state) {
       $('pause').disabled = !['playing', 'countdown'].includes(state);
-      $('hold').disabled = state !== 'playing';
-      if (state === 'over') { cancelStroke(); $('intro').hidden = false; $('intro').querySelector('h1').textContent = `${mode === 'tilt' ? 'Tilt' : 'Finger'} · Wand down`; $('play').textContent = 'Play again'; }
+      if (state === 'countdown' || state === 'playing') $('intro').hidden = true;
+      if (state === 'over') { cancelStroke(); $('intro').hidden = false; $('intro').querySelector('h1').textContent = 'Wand down · Cast to play again'; }
     },
     onCast(cast) {
       clearTimeout(feedbackTimer);
-      $('feedback').textContent = cast.spell ? `${cast.name}${cast.ok ? ' ✓' : ' · no target'}` : 'Try again — follow the rune.';
+      const starting = ['lobby', 'over'].includes(game.state) && !!cast.spell;
+      $('feedback').textContent = starting ? `${cast.name} ✓ · Game starting` : cast.spell ? `${cast.name}${cast.ok ? ' ✓' : ' · no target'}` : 'Try again — follow the rune.';
+      if (starting) {
+        // Any recognized spell starts local play, even without a matching demo target.
+        // Wait until this cast has finished resolving in the engine.
+        const round = game;
+        queueMicrotask(() => { if (game === round && !paused && ['lobby', 'over'].includes(game.state)) game.start(); });
+      }
       feedbackTimer = setTimeout(() => { $('feedback').textContent = help(); }, 2200);
     },
   });
@@ -60,13 +68,19 @@ for (const spell of SPELLS) {
 function cancelStroke() {
   if (pointer !== null) {
     const id = pointer; pointer = null;
-    for (const node of [$('arena'), $('hold')]) if (node.hasPointerCapture(id)) node.releasePointerCapture(id);
+    if (document.documentElement.hasPointerCapture(id)) document.documentElement.releasePointerCapture(id);
+  }
+  if (casting) {
+    casting = false;
     game.removePlayer('device'); game.addPlayer('device', 0);
   }
-  $('hold').classList.remove('casting');
+  document.body.classList.remove('casting');
 }
 function pause() {
-  request++; $('play').disabled = false; cancelStroke();
+  // An iOS permission prompt can briefly deactivate the app. Keep its reply
+  // valid, but discard the held touch so permission approval never casts.
+  if (!motionPending) request++;
+  cancelStroke();
   if (!['playing', 'countdown'].includes(game.state)) return;
   paused = true; game.setPaused(true); $('paused').hidden = false;
   void game.sound.ctx?.suspend();
@@ -74,24 +88,28 @@ function pause() {
 function resume() {
   paused = false; game.setPaused(false); $('paused').hidden = true;
   if (!game.isMuted()) game.sound.init();
-  if (mode === 'tilt') native({ type: 'center' });
+  if (mode === 'tilt') { motionSampleReady = false; native({ type: 'center' }); }
 }
 function motionReady(allowed, token) {
   if (token !== request || mode !== 'tilt') return;
-  $('play').disabled = false;
+  motionPending = false; motionEnabled = allowed; motionSampleReady = false;
   if (!allowed) { $('notice').textContent = 'Motion is unavailable. Allow motion in Settings, retry, or choose Finger mode. Each mode has a separate best score.'; return; }
-  resume(); $('intro').hidden = true; game.start();
+  $('notice').textContent = 'Motion ready. Hold the screen, tilt through a rune, then release.';
 }
 function motionUnavailable() {
   if (mode !== 'tilt') return;
+  motionEnabled = false; motionPending = false; motionSampleReady = false;
   pause(); $('paused').querySelector('p').textContent = 'Motion is unavailable. Enable motion access, or choose Finger mode above.';
+  $('notice').textContent = 'Motion is unavailable. Hold to retry, or choose Finger mode.';
 }
 window.deviceGame = {
   pause, motionReady, motionUnavailable,
   move(point) {
     if (mode !== 'tilt' || paused || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
     sample = { x: Math.max(0, Math.min(1, point.x)), y: Math.max(0, Math.min(1, point.y)) };
-    game.inputLocal('device', sample.x, sample.y, pointer !== null);
+    motionSampleReady = true;
+    if (pointer !== null && motionEnabled && !casting) beginTiltStroke();
+    game.inputLocal('device', sample.x, sample.y, casting);
   },
 };
 window.addEventListener('message', event => {
@@ -101,10 +119,6 @@ window.addEventListener('message', event => {
   if (['pause', 'motionReady', 'motionUnavailable', 'move'].includes(command) && Array.isArray(event.data.args)) window.deviceGame[command](...event.data.args);
 });
 $('pause').onclick = pause; $('resume').onclick = resume;
-$('play').onclick = () => {
-  if (mode === 'tilt') { $('play').disabled = true; $('notice').textContent = ''; native({ type: 'motion', token: ++request }); }
-  else { resume(); $('intro').hidden = true; game.start(); }
-};
 $('mode').onchange = () => {
   const next = $('mode').value; $('mode').value = mode;
   if (next === mode) return;
@@ -115,7 +129,7 @@ $('mode').onchange = () => {
 $('switch').onclick = () => { if (!pendingMode) return; mode = pendingMode; pendingMode = null; createRound(); };
 $('cancel').onclick = () => { pendingMode = null; $('confirm').hidden = true; if (!wasPaused) resume(); };
 $('sound').onclick = () => { game.sound.init(); const muted = game.toggleMute(); $('sound').textContent = muted ? 'Sound off' : 'Sound on'; };
-$('center').onclick = () => { cancelStroke(); native({ type: 'center' }); };
+$('center').onclick = () => { cancelStroke(); motionSampleReady = false; native({ type: 'center' }); };
 $('mirror').onclick = () => { pause(); native({ type: 'mirror' }); };
 $('back').onclick = () => { pause(); native({ type: 'back' }); };
 function fingerPoint(event, cast) {
@@ -124,24 +138,31 @@ function fingerPoint(event, cast) {
   const y = Math.max(0, Math.min(1, (event.clientY - box.top) / box.height));
   game.inputLocal('device', x, y, cast);
 }
-for (const [node, castingMode] of [[$('arena'), 'finger'], [$('hold'), 'tilt']]) {
-  node.addEventListener('pointerdown', event => {
-    if (mode !== castingMode || pointer !== null || paused || game.state !== 'playing') return;
-    event.preventDefault(); pointer = event.pointerId; node.setPointerCapture(pointer);
-    if (mode === 'finger') fingerPoint(event, true);
-    else { $('hold').classList.add('casting'); game.inputLocal('device', sample.x, sample.y, true); }
-  });
-  node.addEventListener('pointermove', event => { if (mode === 'finger' && event.pointerId === pointer) { event.preventDefault(); fingerPoint(event, true); } });
-  node.addEventListener('pointerup', event => {
-    if (event.pointerId !== pointer) return;
-    pointer = null;
+function beginTiltStroke() {
+  casting = true; document.body.classList.add('casting');
+  game.inputLocal('device', sample.x, sample.y, true);
+}
+document.addEventListener('pointerdown', event => {
+  if (event.target.closest('button,select,option') || pointer !== null || paused || !['lobby', 'playing', 'over'].includes(game.state) || !$('confirm').hidden || innerHeight > innerWidth) return;
+  event.preventDefault(); pointer = event.pointerId; document.documentElement.setPointerCapture(pointer);
+  if (mode === 'finger') { casting = true; document.body.classList.add('casting'); fingerPoint(event, true); }
+  else if (!motionEnabled) {
+    if (!motionPending) { motionPending = true; $('notice').textContent = 'Enabling motion…'; native({ type: 'motion', token: ++request }); }
+  } else if (motionSampleReady) beginTiltStroke();
+});
+document.addEventListener('pointermove', event => { if (mode === 'finger' && casting && event.pointerId === pointer) { event.preventDefault(); fingerPoint(event, true); } });
+document.addEventListener('pointerup', event => {
+  if (event.pointerId !== pointer) return;
+  pointer = null;
+  const releaseCast = casting; casting = false;
+  if (releaseCast) {
     if (mode === 'finger') fingerPoint(event, false);
     else game.inputLocal('device', sample.x, sample.y, false);
-    $('hold').classList.remove('casting');
-  });
-  node.addEventListener('pointercancel', cancelStroke);
-  node.addEventListener('lostpointercapture', cancelStroke);
-}
+  }
+  document.body.classList.remove('casting');
+});
+document.addEventListener('pointercancel', cancelStroke);
+document.addEventListener('lostpointercapture', cancelStroke);
 // A phone rotating out of landscape must pause rather than lose lives behind the prompt.
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
 window.addEventListener('resize', () => { if (innerHeight > innerWidth) pause(); });

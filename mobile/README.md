@@ -8,15 +8,16 @@ Choose **Play on this device** on the home screen or under **Start a game**.
 The Classic game fills the landscape screen. There is no separate drawing pad.
 Menus and the online wand controller remain portrait.
 
-- **Tilt mode** is selected by default. Tap **Start Tilt game**, allow motion,
-  hold **HOLD TO CAST**, tilt the phone through a rune, then release. The starting
-  pose centers the wand; use **Center wand** to recenter. Screen-up tilt uses the
-  landscape sensor axis. Motion denial leaves Tilt selected and offers an
-  explicit switch to Finger mode.
-- **Finger mode** draws directly on the game screen. Lift to cast. Selecting a
+- **Tilt mode** is selected by default. Hold anywhere on the game screen, allow
+  motion if asked, tilt through one of the displayed runes, then release. A valid
+  spell starts the round; a tap or incomplete rune does not. There is no start
+  button or dedicated cast button. During play, hold anywhere to cast. Use
+  **Center wand** to recenter; menu controls remain tappable.
+- **Finger mode** draws directly on the game screen. Lift to cast; a recognized spell starts the round. Selecting a
   different mode during a round asks to end the run and reset the score.
 - **Tilt best** and **Finger best** are independent. Best scores save as you earn
-  points, including when leaving or switching mid-run. The iOS app persists them
+  points, including when leaving or switching mid-run. Cast another spell after
+  game over to play again. The iOS app persists them
   in local device storage; the web preview uses browser storage. Existing Classic
   and online scores are not imported into either mode.
 
