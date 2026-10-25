@@ -1,4 +1,11 @@
-SpellsCast is a native iPhone controller for a companion browser game. It also includes standalone offline rune practice. No login, purchase, subscription, or account is required in the app.
+SpellsCast includes a full offline iPhone game, standalone rune practice, and a controller for the companion browser game. No login, purchase, subscription, or account is required.
+
+To review the new on-device game without another screen:
+1. Choose Play on this device. The game opens in landscape.
+2. Tilt is selected by default. Hold anywhere on the game screen, allow motion if prompted, tilt through a displayed rune, then release. The first recognized spell starts a round. A tap or permission approval alone does not start play.
+3. To test without sensors, choose Finger mode in the top menu. Draw the red V-shaped Expel rune directly on the screen and lift your finger. This starts the game. Keep casting runes matching the targets.
+4. Each mode keeps its own local best score. Switching modes confirms ending the current run. Cast another spell after game over to restart.
+5. Mirror explains AirPlay and HDMI setup; actual mirroring starts in iOS Control Center. Local play pauses while backgrounded or opening the guide. In this mode, mirroring shows the full landscape game.
 
 To review connected play:
 1. On a separate computer, open https://emirhan777.github.io/SpellsCast/ and leave it open. Click the page once to enable audio.

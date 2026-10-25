@@ -4,12 +4,16 @@ appId: com.emirhansimsek.spellscast
     clearState: true
 - extendedWaitUntil:
     visible:
-      id: start-game-button
+      id: play-device-button
     timeout: 60000
 - takeScreenshot: 01-home
+- scrollUntilVisible:
+    element:
+      id: start-game-button
+    direction: DOWN
 - tapOn:
     id: start-game-button
-- assertVisible: Send to a computer
+- assertVisible: Play on this device
 - takeScreenshot: 02-start-a-game
 - tapOn: Back
 - tapOn:
@@ -21,6 +25,10 @@ appId: com.emirhansimsek.spellscast
 - takeScreenshot: 03-join-a-game
 - launchApp:
     clearState: true
+- scrollUntilVisible:
+    element:
+      id: practice-button
+    direction: DOWN
 - tapOn:
     id: practice-button
 - assertVisible: SPELL PRACTICE
@@ -29,3 +37,11 @@ appId: com.emirhansimsek.spellscast
 - takeScreenshot: 05-practice-levitate
 - tapOn: 'Banish:.*'
 - takeScreenshot: 06-practice-banish
+- launchApp:
+    clearState: true
+- tapOn:
+    id: play-device-button
+- extendedWaitUntil:
+    visible: Hold anywhere. Cast to begin.
+    timeout: 30000
+- takeScreenshot: 07-landscape-game
