@@ -1,6 +1,6 @@
 # SpellsCast for iPhone
 
-A native Expo / React Native wand controller for the [SpellsCast browser game](https://emirhan777.github.io/SpellsCast/). Expo SDK 57, iOS 16.4 or later.
+A native Expo / React Native wand controller for the [SpellsCast browser game](https://emirhan777.github.io/SpellsCast/). Expo SDK 58, iOS 16.4 or later.
 
 ## Play on this device
 
@@ -45,7 +45,7 @@ npm install
 npx expo start --go --tunnel
 ```
 
-1. Install an Expo Go build compatible with SDK 57 on your iPhone: https://expo.dev/go.
+1. Update Expo Go from the iPhone App Store. This project uses SDK 58: https://expo.dev/go.
 2. Sign in to Expo Go with the same Expo account used by the CLI (`npx expo whoami`).
 3. Scan the **terminal QR** with the iPhone Camera to open SpellsCast in Expo Go.
 4. Choose **Play on this device** to play locally. For connected play, open the browser game on a **different screen**.

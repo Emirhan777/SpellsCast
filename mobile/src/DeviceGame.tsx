@@ -16,7 +16,7 @@ function Action({ title, onPress }: { title: string; onPress: () => void }) {
 function Awake() { useKeepAwake(undefined, { suppressDeactivateWarnings: true }); return null; }
 
 export default function DeviceGame({ foreground, onBack }: { foreground: boolean; onBack: () => void }) {
-  const web = useRef<WebView>(null);
+  const web = useRef<WebView<object>>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const [mirror, setMirror] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -74,7 +74,7 @@ export default function DeviceGame({ foreground, onBack }: { foreground: boolean
     {!source ? <ActivityIndicator color="#eed297" style={styles.root} /> : Platform.OS === 'web' ? <iframe ref={frame} title="SpellsCast game" srcDoc={source.html} style={{ flex: 1, width: '100%', border: 0 }} /> : failed ? <View style={styles.fallback}>
       <Text style={styles.text}>The game could not load. Try reopening it.</Text>
       <Action title="Reload game" onPress={() => { setInitialBests({ ...bests.current }); setFailed(false); setRevision(v => v + 1); }} /><Action title="Back" onPress={onBack} />
-    </View> : <WebView key={revision} ref={web} source={source} originWhitelist={['*']} style={styles.root}
+    </View> : <WebView<object> key={revision} ref={web} source={source} originWhitelist={['*']} style={styles.root}
       javaScriptEnabled scrollEnabled={false} bounces={false} overScrollMode="never"
       automaticallyAdjustContentInsets={false} contentInsetAdjustmentBehavior="never"
       allowsInlineMediaPlayback mediaPlaybackRequiresUserAction

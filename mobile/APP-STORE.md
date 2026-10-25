@@ -1,5 +1,9 @@
 # App Store release preparation
 
+## Expo Go compatibility update (October 25, 2026)
+
+The source now uses Expo SDK 58 with its matching React Native, React and native module versions so it can open in current Expo Go. Update Expo Go from the iPhone App Store before scanning the development QR. This source upgrade does not update the published App Store binary.
+
 ## Unreleased landscape play (October 20, 2026)
 
 **Play on this device** now opens a full-screen landscape game. **Tilt** is the default mode: hold the cast button, tilt through a rune, then release; Center wand recalibrates. **Finger** mode draws directly on the game canvas. Switching modes starts a new round after confirmation. Tilt best and Finger best save independently in local device storage, including points earned before leaving or switching modes. Online Classic/duel scores remain separate.
