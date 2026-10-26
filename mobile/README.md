@@ -29,8 +29,8 @@ mirroring may add display delay. Local play pauses while opening the guide or
 leaving the foreground, and interrupted strokes do not cast.
 
 No QR, room, second device or internet is needed for local play. Wizard duel
-remains a separate-screen mode. This feature is source-only until a new native
-binary is released; version 1.1.0 (6) does not include it. Expo Go supports the
+remains a separate-screen mode. Local play is available in App Store version
+**1.2.0 (9)**; version 1.1.0 (6) predates it. Expo Go supports the
 required modules. Test both landscape motion and mirroring on a physical iPhone.
 
 After changing game code, run `npm run build:device-game`;

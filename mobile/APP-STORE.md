@@ -1,18 +1,26 @@
 # App Store release preparation
 
+## Published release (October 26, 2026)
+
+- **SpellsCast 1.2.0 (build 9) is live.** App Store Connect confirms `READY_FOR_DISTRIBUTION`, and the public Turkey listing reports version 1.2.0, released October 26 at 16:34 Istanbul time. [App Store](https://apps.apple.com/tr/app/spellscast/id6815057736).
+- The signed production build is [9623abe3-5bd5-45af-a412-44bcbe8f2e41](https://expo.dev/accounts/emirhansimsek_lightning/projects/spellscast/builds/9623abe3-5bd5-45af-a412-44bcbe8f2e41), from commit `78471d8`. The downloaded IPA's bundle identifier, version, build number and landscape support were verified. Apple upload `33c56955-e412-49ba-9e75-d92d9015cac6` completed without errors or warnings.
+- The release includes offline landscape play, hold-anywhere Tilt casting, direct Finger casting, separate local best scores, spell-to-start/restart, mirroring instructions and Expo SDK 58. Listing, review notes, help and privacy content were updated. Promotional text remains **Turn your phone to a magic wand**.
+- Eleven native unit tests, lint, typecheck, offline bundle consistency and iOS bundle export passed. Real simulator navigation reached the on-device game's opening instructions. Physical motion direction and AirPlay/HDMI still require device verification.
+- Six refreshed portrait screenshots are archived under `store-assets/screenshots/1.2.0/`; they were not uploaded by this session. A blank landscape capture was rejected during visual inspection. The final retake job was canceled when the published release was confirmed. No blank screenshot was uploaded.
+
 ## Expo Go compatibility update (October 25, 2026)
 
-The source now uses Expo SDK 58 with its matching React Native, React and native module versions so it can open in current Expo Go. Update Expo Go from the iPhone App Store before scanning the development QR. This source upgrade does not update the published App Store binary.
+Version 1.2.0 uses Expo SDK 58 with matching React Native, React and native module versions. Update Expo Go from the iPhone App Store before scanning a development QR.
 
-## Unreleased landscape play (October 20, 2026)
+## Landscape play (introduced October 20; released in 1.2.0)
 
 **Play on this device** now opens a full-screen landscape game. **Tilt** is the default mode: hold anywhere on the game screen, tilt through a rune, then release; Center wand recalibrates. **Finger** mode draws directly on the game canvas. There is no local start button or dedicated cast button: a recognized spell starts or restarts a round. Permission approval or a tap alone does not start play. Switching modes starts a new round after confirmation. Tilt best and Finger best save independently in local device storage, including points earned before leaving or switching modes. Online Classic/duel scores remain separate.
 
 Mirror opens the AirPlay/HDMI guide. The TV mirrors the landscape game; display borders depend on its aspect ratio and mirroring settings. Backgrounding pauses local play and discards incomplete strokes. The game screen hides the status bar; menus and online controller remain portrait.
 
-This update has **not been uploaded or submitted to Apple** and is not in 1.1.0 (6). It requires a new native build for WebView, AsyncStorage and landscape orientation support. Expo Go can test the source. Native lint, typecheck, unit tests, iOS bundle export and simulated landscape casting/mode isolation checks pass. Physical iPhone motion direction and AirPlay/HDMI still need verification.
+This update is included in published version **1.2.0 (9)**. Version 1.1.0 (6) predates these features. Native lint, typecheck, unit tests, iOS bundle export and simulated landscape casting/mode isolation checks passed. Physical iPhone motion direction and AirPlay/HDMI still need verification.
 
-## Current release status (October 9, 2026)
+## Historical submission status (October 9, 2026)
 
 - Apple confirms **1.0.1 (5)** is the currently published release.
 - Multiplayer update **1.1.0 (6)** built successfully, was verified for bundle `com.emirhansimsek.spellscast`, uploaded without errors or warnings, processed as `VALID`, and attached to version 1.1.0. [EAS production build](https://expo.dev/accounts/emirhansimsek_lightning/projects/spellscast/builds/dc33f3d2-14ab-4bd6-ad75-6b9e2cb97ba9).

@@ -1,5 +1,13 @@
 # App Store screenshots
 
+## Version 1.2.0 capture (October 25, 2026)
+
+Six refreshed portrait screenshots are archived in [screenshots/1.2.0/en-US/6.9-inch](screenshots/1.2.0/en-US/6.9-inch/). They are unedited 1320 x 2868 RGB PNGs from an iPhone 18 Pro Max simulator, captured from the standalone 1.2.0 simulator app compiled by build `dd678cb8-d20d-422d-986b-d06fd0a56098`. Capture job `c283be61-90a9-435b-863a-c61e20ef47e9` reused that app. Provenance is stored with the images.
+
+These images were visually checked but were not uploaded by this session. The landscape image was a blank frame and was discarded. A follow-up capture job was canceled after Apple confirmed version 1.2.0 (9) was already live. The capture workflow now waits for rotation and adds a final simulator screenshot; that final retake remains unverified.
+
+## Original screenshots (September 23, 2026)
+
 Six unedited screenshots from the standalone iOS Release simulator app are in [screenshots/en-US/6.9-inch](screenshots/en-US/6.9-inch/). They were captured and visually checked on September 23, 2026.
 
 - Device: iPhone 17 Pro Max, iOS 26.5.
