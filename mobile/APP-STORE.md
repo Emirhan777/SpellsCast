@@ -1,6 +1,16 @@
 # App Store release preparation
 
-## Pending update: player invitations (October 26, 2026)
+## Submitted update: 1.2.1 (build 10), October 26, 2026
+
+**Apple status: WAITING_FOR_REVIEW.** Submitted October 26 at 21:29 Istanbul.
+The update releases automatically after approval (`AFTER_APPROVAL`). Version
+1.2.0 (9) remains the live release until Apple approves this update.
+
+- Production build: [0d1c0a23-5d99-4c10-b74b-41c42041dcfa](https://expo.dev/accounts/emirhansimsek_lightning/projects/spellscast/builds/0d1c0a23-5d99-4c10-b74b-41c42041dcfa), source commit `70f1ec2`.
+- The downloaded signed IPA verifies bundle `com.emirhansimsek.spellscast`, version 1.2.1, build 10, landscape-right support and the invitation UI in its JavaScript bundle.
+- Apple upload `c863cd45-1f22-4a60-a9f1-f63b9ada4de0` completed without errors or warnings; the build processed as `VALID`. The queued EAS upload job was canceled before using the direct Apple upload API.
+- App Store version ID: `6594fd41-7890-4641-9929-2367171d9e29`. Review submission: `abdf20d3-43c3-4f21-baac-939531244779`.
+- Updated release notes, description and review instructions; complete review contact and six existing screenshots retained. Promotional text remains **Turn your phone to a magic wand**.
 
 The source adds **Invite second player** to the connected-room screen and online
 wand controls between rounds. It shares the existing room's browser/app join
@@ -9,8 +19,7 @@ Full rooms disable invitations; unavailable sharing falls back to a copy-link
 dialog. Short screens use one row of spell cards so casting and invite controls
 remain accessible. Offline on-device play is still solo.
 
-This feature is **not included in the live 1.2.0 (9) build**. No new App Store
-build or review submission has been created for it. Lint, typecheck, all twelve
+This feature is **not included in the live 1.2.0 (9) build**. Lint, typecheck, all twelve
 native unit tests, the web export, offline bundle consistency, gameplay tests
 and live Firebase relay checks passed. Browser integration verified the same-room
 second slot, third-player rejection, host closure and share/copy fallbacks. The

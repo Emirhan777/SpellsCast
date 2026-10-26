@@ -1,34 +1,26 @@
-SpellsCast includes a full offline iPhone game, standalone rune practice, and a controller for the companion browser game. No login, purchase, subscription, or account is required.
+SpellsCast includes an offline iPhone game, rune practice, and a controller for its companion browser game. No account, purchase, subscription, or login is required.
 
-To review the new second-player invitations:
-1. Open https://emirhan777.github.io/SpellsCast/ on a separate computer and keep that screen open.
-2. Connect the iPhone using Join an existing game and the QR or six-digit room code. No account is required.
-3. Before starting a round, tap Invite second player on the connected screen or online wand controls. The native share sheet contains a link to this same room. The computer switches to Wizard duel.
-4. Send the invite to a second phone, or copy it. The recipient can use the browser controller or choose Open in SpellsCast to use the installed app. The first phone remains connected while sharing; a real network disconnection still requires reconnecting.
-5. Both players connected replaces the invite button when the room is full. Select Start duel. Invitations are hidden during an active round; no third player can join.
-6. If a system share sheet is unavailable, a dialog provides Copy invite link and a selectable URL. The offline on-device game remains solo.
+NEW IN 1.2.1: INVITE A SECOND PLAYER
+1. Open https://emirhan777.github.io/SpellsCast/ on a separate computer and keep it open. Click the page once to enable its audio.
+2. On the iPhone, choose Join an existing game. Scan the computer's QR (allow camera access) or enter its six-digit room code.
+3. Before starting a round, tap Invite second player on the connected screen or wand controls. The native share sheet contains a link to this same room. The computer switches to Wizard duel.
+4. Send the invite to a second phone, or copy it. The recipient can use the browser controller or choose Open in SpellsCast to use the installed app. The first phone stays connected during sharing; actual network loss still requires reconnecting.
+5. With both phones connected, select Start duel. The first correct cast received by the host claims each target for one point. Both phones display their individual score, opponent score, timer, and result. Highest score wins. Select Rematch to play again.
+6. Full rooms disable inviting; no third player can join. Invitations are hidden during active rounds. If system sharing is unavailable, a dialog provides Copy invite link and a selectable URL. Offline on-device play remains solo.
 
-To review the on-device game without another screen:
-1. Choose Play on this device. The game opens in landscape.
-2. Tilt is selected by default. Hold anywhere on the game screen, allow motion if prompted, tilt through a displayed rune, then release. The first recognized spell starts a round. A tap or permission approval alone does not start play.
-3. To test without sensors, choose Finger mode in the top menu. Draw the red V-shaped Expel rune directly on the screen and lift your finger. This starts the game. Keep casting runes matching the targets.
-4. Each mode keeps its own local best score. Switching modes confirms ending the current run. Cast another spell after game over to restart.
-5. Mirror explains AirPlay and HDMI setup; actual mirroring starts in iOS Control Center. Local play pauses while backgrounded or opening the guide. In this mode, mirroring shows the full landscape game.
+CASTING IN CONNECTED PLAY
+Choose Use motion wand (allow motion access) or Use touch controls. Point at the computer screen. Hold the cast pad, draw a rune by moving the phone, then release. In touch mode, draw on the pad and lift your finger. Classic mode supports one phone. Start a round using Start game or a recognized spell.
 
-To review connected play:
-1. On a separate computer, open https://emirhan777.github.io/SpellsCast/ and leave it open. Click the page once to enable audio.
-2. On the iPhone, choose Join an existing game, then Scan the game QR. Allow camera access and scan the code shown by the computer. Alternatively, enter the six-digit room code shown on the computer.
-3. Choose Use motion wand and allow motion access, or choose Use touch controls.
-4. Tap Start game. Hold the cast pad, move the phone through a rune, and release. In touch mode, draw the rune on the pad and lift your finger.
-5. The score and lives appear on the phone. Two phones can join one room.
+ON-DEVICE GAME: NO SECOND SCREEN NEEDED
+1. Choose Play on this device. The game opens in landscape with Tilt selected.
+2. Hold anywhere, allow motion if prompted, tilt through a displayed rune, then release. A recognized spell starts a round; a tap or permission approval alone does not.
+3. To test without sensors, select Finger in the top menu. Draw the red V-shaped Expel rune directly on the screen and lift. Continue casting runes matching the targets. Cast again after game over to restart.
+4. Tilt and Finger keep separate local best scores. Switching modes confirms ending the current run. Mirror explains AirPlay and HDMI setup; start actual Screen Mirroring in iOS Control Center. The full landscape game is mirrored. Local play pauses while backgrounded or while the mirroring guide is open.
 
-To review starting from the app:
-Choose Start a game, then Create a game link. Send or copy the link to your computer. Open it on the computer and select Open game on this screen. Return to the iPhone app; it pairs automatically. Choose a control mode and tap Start game. An unused link expires after ten minutes.
+START A SCREEN FROM THE APP
+Choose Start a game, then Create a game link. Send or copy it to a computer. Open it there and select Open game on this screen. Return to the app; it pairs automatically. An unused screen-launch link expires after ten minutes.
 
-To review without another device, camera, or motion access:
-Choose Practice your spells. Draw each displayed rune with your finger. Tap another spell to change the guide. This mode works offline.
+OFFLINE PRACTICE
+Choose Practice your spells. Draw the displayed rune with a finger; tap another spell to change the guide. No camera, sensors, network, or second device is needed.
 
-The camera is used only to scan the room QR and does not save or upload images. Motion controls convert orientation to wand coordinates. Sound plays on the computer or TV game screen. A TV must have a compatible browser, or display a computer via HDMI or Mac AirPlay. Standard iPhone mirroring displays the phone controller.
-
-To review Wizard duel:
-On the computer game screen, select Wizard duel and a match length. Connect two phones to the same room, then select Start duel. Both phones display individual scores, opponent scores, the timer, and the final result. The first correct cast received by the game claims each target for one point. Select Rematch to play again. Classic mode and offline practice can be reviewed using one phone.
+The camera only scans room QR codes; images are not saved or uploaded. Motion becomes wand coordinates. Online play requires a computer or compatible TV browser showing the companion game; the phone is its controller. On-device play works offline and is mirrored through iOS Screen Mirroring or compatible HDMI hardware.

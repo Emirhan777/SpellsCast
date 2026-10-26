@@ -52,8 +52,9 @@ invitations are hidden during a round. If sharing is unavailable, the app offers
 a selectable link and **Copy invite link**. The offline on-device game has no
 online room to invite players into.
 
-The invite button is in the development source and is not included in published
-App Store version **1.2.0 (9)**.
+The invite button is included in **1.2.1 (10)**, submitted to Apple on October 26,
+2026 and waiting for review with automatic release after approval. Published
+version **1.2.0 (9)** predates it.
 
 ## Try it in Expo Go
 
