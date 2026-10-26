@@ -4,12 +4,22 @@ import { parseRoom, claimPlayer } from '../src/protocol';
 import { createTracker } from '../../game/tilt.js';
 import { SPELLS, recognize } from '../../game/spells.js';
 import { createBlade } from '../../game/blade.js';
+import { playerInvite } from '../../game/invite.js';
 
 test('desktop QR, manual code and native deep links identify the same room', () => {
  for (const input of ['123456',' 123456 ', 'https://emirhan777.github.io/SpellsCast/play.html?room=123456', 'spellscast://join?room=123456']) assert.equal(parseRoom(input),'123456');
 });
 test('unrelated QR codes and ambiguous or invalid room IDs are rejected', () => {
  for (const input of ['', '12345','1234567','abcdef','https://example.com/?room=123456','https://emirhan777.github.io.evil.example/SpellsCast/play.html?room=123456','https://emirhan777.github.io/SpellsCast/play.html?room=123456&room=654321','spellscast://other?room=123456']) assert.throws(()=>parseRoom(input));
+});
+test('player invites preserve the room across browser and app without forwarding screen launch tokens', () => {
+ const invite = playerInvite('012345');
+ assert.equal(invite.url, 'https://emirhan777.github.io/SpellsCast/play.html?room=012345');
+ assert.equal(parseRoom(invite.url), '012345');
+ const local = playerInvite('012345', 'http://localhost:3000/index.html?mouse=1#launch=secret');
+ assert.equal(local.url, 'http://localhost:3000/play.html?room=012345');
+ assert.equal(parseRoom(local.url), '012345');
+ for (const invalid of ['', '12345', '1234567', '123456&room=654321']) assert.throws(() => playerInvite(invalid));
 });
 test('slot claims preserve players, fill gaps, and reject a third wand', () => {
  const first=claimPlayer(null,'a')!; assert.equal(first.a.slot,0);

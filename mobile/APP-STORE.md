@@ -1,5 +1,22 @@
 # App Store release preparation
 
+## Pending update: player invitations (October 26, 2026)
+
+The source adds **Invite second player** to the connected-room screen and online
+wand controls between rounds. It shares the existing room's browser/app join
+link, prepares Wizard duel on the host, and retains the first wand while sharing.
+Full rooms disable invitations; unavailable sharing falls back to a copy-link
+dialog. Short screens use one row of spell cards so casting and invite controls
+remain accessible. Offline on-device play is still solo.
+
+This feature is **not included in the live 1.2.0 (9) build**. No new App Store
+build or review submission has been created for it. Lint, typecheck, all twelve
+native unit tests, the web export, offline bundle consistency, gameplay tests
+and live Firebase relay checks passed. Browser integration verified the same-room
+second slot, third-player rejection, host closure and share/copy fallbacks. The
+app web preview verified share-related background/return behavior and the 320px
+layout. Native iOS share extensions still require a physical iPhone check.
+
 ## Published release (October 26, 2026)
 
 - **SpellsCast 1.2.0 (build 9) is live.** App Store Connect confirms `READY_FOR_DISTRIBUTION`, and the public Turkey listing reports version 1.2.0, released October 26 at 16:34 Istanbul time. [App Store](https://apps.apple.com/tr/app/spellscast/id6815057736).

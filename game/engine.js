@@ -345,6 +345,7 @@ export function createGame(canvas, { onHud, onState, onCast, bestKey = BEST_KEY,
       score, best: Math.max(best, score), lives, combo, status: state,
       spell: lastCast?.name || "", castOk: lastCast?.ok ?? null,
       castPid: lastCast?.pid || '', mode, duration, timeLeft, winnerSlot, result, matchNotice,
+      playerCount: blades.size,
       matchReady: blades.size === 2 && new Set([...blades.values()].map(b => b.slot)).size === 2,
       wizards: (wizards.length ? wizards : [...blades].map(([pid, b]) => ({ pid, slot: b.slot, score: 0 })))
         .map(w => ({ ...w })),

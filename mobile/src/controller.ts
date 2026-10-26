@@ -6,7 +6,7 @@ import { createWandSender } from '../../game/wand-stream';
 import { controllerHud } from '../../game/match';
 
 const db = getDatabase(getApps().length ? getApp() : initializeApp(firebaseConfig));
-export type Controller = { send: (sample: Point) => void; command: (type: 'start' | 'center') => void; destroy: () => void };
+export type Controller = { send: (sample: Point) => void; command: (type: 'start' | 'center' | 'invite') => void; destroy: () => void };
 
 type Callbacks = { onHud: (hud: Hud) => void; onStatus: (status: string) => void; onClosed: (reason: string) => void };
 export async function joinRoom(code: string, callbacks: Callbacks, signal: AbortSignal): Promise<Controller> {

@@ -6,6 +6,7 @@ import { firebaseConfig } from '../../firebase-config.js';
 import { joinRoom } from '../src/controller';
 import { reserveScreen } from '../src/launch';
 import { claimLaunch } from '../../game/launch.js';
+import { playerInvite } from '../../game/invite.js';
 async function main() {
 const app=initializeApp(firebaseConfig,'mobile-relay-test');
 const db=getDatabase(app);
@@ -17,7 +18,10 @@ try {
  await set(room,{game:'spellscast',createdAt:Date.now(),status:'lobby'});
  let hud:any={},otherHud:any={},status='',closed='';
  const a=await joinRoom(code,{onHud:v=>hud=v,onStatus:v=>status=v,onClosed:v=>closed=v},new AbortController().signal);sessions.push(a);
- const b=await joinRoom(code,{onHud:v=>otherHud=v,onStatus(){},onClosed(){}},new AbortController().signal);sessions.push(b);
+ a.command('invite');
+ await pause(200);
+ assert.equal((Object.values((await get(ref(db,`rooms/${code}/cmd`))).val())[0] as any).type,'invite');
+ const b=await joinRoom(playerInvite(code).url,{onHud:v=>otherHud=v,onStatus(){},onClosed(){}},new AbortController().signal);sessions.push(b);
  await assert.rejects(joinRoom(code,{onHud(){},onStatus(){},onClosed(){}},new AbortController().signal),/two wands/);
  a.send({x:.2,y:.3,cast:true});a.send({x:.8,y:.7,cast:false});a.command('start');
  await set(ref(db,`rooms/${code}/hud`),{score:25,lives:2,spell:'Banish',castOk:true});

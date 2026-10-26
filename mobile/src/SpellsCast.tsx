@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, AppState, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type GestureResponderEvent } from 'react-native';
+import { ActivityIndicator, AppState, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, type GestureResponderEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -13,6 +13,7 @@ import { joinRoom, type Controller } from './controller';
 import { GAME_URL, parseRoom, type Hud, type Point } from './protocol';
 import { useWand } from './useWand';
 import StartGame from './StartGame';
+import InvitePlayer from './InvitePlayer';
 
 const GOLD = '#eed297', DIM = '#a79eb8';
 type Phase = 'home' | 'start' | 'joining' | 'ready' | 'playing' | 'practice';
@@ -50,6 +51,7 @@ function Button({ title, onPress, secondary = false, disabled = false, testID }:
 function Awake() { useKeepAwake(undefined, { suppressDeactivateWarnings: true }); return null; }
 
 export default function SpellsCast() {
+  const compact = useWindowDimensions().height < 700;
   const params = useLocalSearchParams<{ room?: string }>();
   const [phase, setPhase] = useState<Phase>('home');
   const [code, setCode] = useState('');
@@ -78,6 +80,8 @@ export default function SpellsCast() {
   const padSize = useRef({ width: 1, height: 1 });
   const lastPaint = useRef(0);
   const scanLock = useRef(false);
+  const sharingInvite = useRef(false);
+  const sharePending = useRef(false);
   const phaseRef = useRef(phase);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   const modeRef = useRef(mode);
@@ -177,11 +181,14 @@ export default function SpellsCast() {
       if (next !== 'active') release(true);
       if (next === 'background') {
         setScanner(false);
-        if (controller.current || phaseRef.current === 'joining') {
+        if (!sharingInvite.current && (controller.current || phaseRef.current === 'joining')) {
           disconnect(); setPhase('home'); setError('You left the game. Tap Connect to rejoin your room.');
         }
       }
-      if (next === 'active') centerWand();
+      if (next === 'active') {
+        if (!sharePending.current) sharingInvite.current = false;
+        centerWand();
+      }
     });
     return () => sub.remove();
   }, [disconnect, release, centerWand]);
@@ -228,6 +235,15 @@ export default function SpellsCast() {
   const isPractice = phase === 'practice';
   const lives = hud.lives ?? 3;
   const duel = !isPractice && hud.mode === 'duel';
+  const invite = !isPractice && ['ready', 'playing'].includes(phase) && ['lobby', 'over'].includes(status)
+    ? <InvitePlayer code={code} full={(hud.playerCount ?? (hud.matchReady ? 2 : 1)) >= 2}
+        onInvite={() => { release(true); controller.current?.command('invite'); }}
+        onSharingChange={sharing => {
+          sharePending.current = sharing;
+          // Share extensions can temporarily background the app. Keep this wand
+          // until we return; a real connection loss still closes it normally.
+          if (sharing || AppState.currentState === 'active') sharingInvite.current = sharing;
+        }} /> : null;
   const castTitle = duel && status === 'over' ? hud.result || 'Match finished' : echo || (casting ? 'Weave your spell…' : isPractice ? SPELLS[practiceSpell].name : status === 'over' ? 'Wand down' : 'Ready to cast');
 
   return <LinearGradient colors={['#21152f', '#0a0811', '#0a0811']} style={styles.root}>
@@ -267,6 +283,7 @@ export default function SpellsCast() {
           <Text style={styles.description}>Hold your phone comfortably, with its screen tilted toward you. This pose becomes your center.</Text>
           <Button title={motionBusy ? 'Enabling motion…' : 'Use motion wand'} disabled={motionBusy} onPress={() => { void startTilt(); }} />
           <Button title="Use touch controls" secondary onPress={() => { setMode('touch'); setPhase('playing'); setMotionNote(''); }} />
+          {invite}
           <Button title="Leave room" secondary onPress={leave} />
         </View>}
         <View style={styles.footer}>
@@ -302,13 +319,14 @@ export default function SpellsCast() {
         </View></View>
         <View style={styles.spellGrid}>{SPELLS.map((spell, index) => <Pressable key={spell.id} accessibilityRole="button" accessibilityLabel={`${spell.name}: ${spell.move}`}
           onPress={() => { if (isPractice) { setPracticeSpell(index); setTrace([]); setEcho(''); } else feedback(spell.name + ' · ' + spell.move); }}
-          style={[styles.spellCard, isPractice && index === practiceSpell && styles.selectedCard]}><Rune spell={spell} size={34} /><Text style={[styles.spellName, { color: spell.color }]}>{spell.name}</Text><Text style={styles.spellMove}>{spell.move}</Text></Pressable>)}</View>
+          style={[styles.spellCard, compact && styles.compactSpellCard, isPractice && index === practiceSpell && styles.selectedCard]}><Rune spell={spell} size={34} /><Text style={[styles.spellName, { color: spell.color }]}>{spell.name}</Text><Text style={styles.spellMove}>{spell.move}</Text></Pressable>)}</View>
         {!isPractice && <View style={styles.controlRow}>
           <View style={{ flex: 1 }}><Button title={mode === 'tilt' ? 'Center wand' : 'Use motion'} secondary disabled={motionBusy} onPress={() => { release(true); if (mode === 'tilt') { centerWand(); feedback('Wand centered'); haptic(); } else void startTilt(); }} /></View>
           <View style={{ flex: 1 }}><Button disabled={duel && status !== 'playing' && !hud.matchReady} title={status === 'playing' ? (mode === 'tilt' ? 'Use touch' : 'Leave room') : status === 'over' ? duel ? 'Rematch' : 'Play again' : duel ? 'Start duel' : 'Start game'}
             secondary={status === 'playing'} onPress={() => { if (status === 'playing') { if (mode === 'tilt') { release(true); setMode('touch'); } else leave(); } else controller.current?.command('start'); }} /></View>
         </View>}
         <Text style={styles.connection}>{isPractice ? 'OFFLINE PRACTICE · no room needed' : `● ROOM ${code} · ${mode.toUpperCase()}`}</Text>
+        {invite}
         {!!motionNote && !isPractice && <Text style={styles.notice}>{motionNote}</Text>}
       </View>}
       </KeyboardAvoidingView>
@@ -347,6 +365,7 @@ const styles = StyleSheet.create({
   padArea: { flex: 1, minHeight: 110, alignItems: 'center', justifyContent: 'center' }, pad: { borderRadius: 36, borderWidth: 2, borderColor: '#6c5836', backgroundColor: '#1b1620', overflow: 'hidden' }, padActive: { borderColor: GOLD, backgroundColor: '#352739' },
   padCenter: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 13 }, padText: { color: GOLD, fontSize: 32, fontWeight: '900', letterSpacing: 3 },
   spellGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, spellCard: { width: '48.5%', flexGrow: 1, alignItems: 'center', borderWidth: 1, borderColor: '#282031', borderRadius: 13, backgroundColor: '#17111f', paddingVertical: 8, paddingHorizontal: 5 }, selectedCard: { borderColor: '#9b8151', backgroundColor: '#2a2030' }, spellName: { fontSize: 12, fontWeight: '800', marginTop: 2 }, spellMove: { fontSize: 9, color: DIM, textAlign: 'center', marginTop: 3 },
+  compactSpellCard: { width: '22%', paddingHorizontal: 2 },
   controlRow: { flexDirection: 'row', gap: 10 }, connection: { fontSize: 10, color: '#9ed9be', textAlign: 'center', letterSpacing: 1 }, notice: { color: '#c5b6cc', fontSize: 10, textAlign: 'center' },
   scanOverlay: { flex: 1, justifyContent: 'center', padding: 28, backgroundColor: '#0004', gap: 18 }, scanTitle: { color: '#fff', fontSize: 27, fontWeight: '800', textAlign: 'center' }, scanSubtitle: { color: '#fff', fontSize: 14, textAlign: 'center' }, scanFrame: { width: '100%', maxWidth: 330, alignSelf: 'center', aspectRatio: 1, borderRadius: 28, borderWidth: 3, borderColor: GOLD, marginVertical: 22 },
 });

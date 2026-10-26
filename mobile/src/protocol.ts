@@ -23,7 +23,7 @@ export function parseRoom(input: string): string {
 
 export type Point = { x: number; y: number; vx?: number; vy?: number; cast?: boolean };
 export type Hud = { score?: number; best?: number; lives?: number; combo?: number; spell?: string; castOk?: boolean | null; status?: string;
-  mode?: string; timeLeft?: number; opponentScore?: number; wizardNumber?: number; result?: string; matchReady?: boolean };
+  mode?: string; timeLeft?: number; opponentScore?: number; wizardNumber?: number; result?: string; matchReady?: boolean; playerCount?: number };
 
 // Pure transaction callback; the native controllers cannot claim the same slot.
 export function claimPlayer(players: Record<string, { slot: number }> | null, pid: string) {

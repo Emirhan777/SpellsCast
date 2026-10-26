@@ -26,6 +26,15 @@ app's scanner to scan the separate game QR on your big screen.
 [Privacy](https://emirhan777.github.io/SpellsCast/privacy.html) ·
 [App Store release preparation](mobile/APP-STORE.md)
 
+## Invite a second wizard
+
+Connect the first phone, then tap **Invite second player** on its controls or
+the game screen. Share the current room's link with your friend. This selects
+**Wizard duel**; when the second phone connects, tap **Start duel**. Browsers
+without a share sheet offer a copyable link. Keep the game screen open for the
+whole match. Each room accepts two players, and invitations are available
+between rounds.
+
 ## The spells
 
 Things fly in wearing the rune of the spell that stops them. Draw it.

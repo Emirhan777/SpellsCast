@@ -152,7 +152,7 @@
     #matchSetup select { color: white; background: #302440; border: 1px solid #655779; }
     #matchSetup button { border: 0; background: #eed297; color: #281b31; font-weight: 800; cursor: pointer; }
     #matchSetup button:disabled { opacity: .45; cursor: default; }
-    #matchHelp { font-size: 13px; line-height: 1.5; color: #c9bfdc; }
+    #matchHelp, #inviteNotice { font-size: 13px; line-height: 1.5; color: #c9bfdc; }
     #duelHud { position: fixed; top: 3vh; left: 3vw; right: 17vh; z-index: 7; display: none;
       justify-content: space-between; align-items: center; gap: 24px; pointer-events: none; }
     #duelHud .wizard { font-size: clamp(14px, 2vh, 24px); font-weight: 800; color: #7fdcff; }
@@ -193,6 +193,8 @@
     <label id="durationLabel" hidden>Match length<select id="durationSelect"><option value="60">1 minute</option><option value="90" selected>90 seconds</option><option value="120">2 minutes</option><option value="180">3 minutes</option></select></label>
     <p id="matchHelp" role="status">Connect your wand, then start.</p>
     <button id="startMatch" disabled>Start game</button>
+    <button id="invitePlayer" disabled>Invite second player</button>
+    <p id="inviteNotice" role="status" hidden></p>
   </aside>
 
   <div id="topControls">
@@ -252,6 +254,7 @@
     import { createHost } from "./game/net.js";
     import { MUSIC_TRACKS } from "./game/music.js";
     import { parseLaunch } from "./game/launch.js";
+    import { sharePlayerInvite } from "./game/share-invite.js";
 
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -263,6 +266,7 @@
     let host = null;
     let connected = false;
     let latestHud = {};
+    let sharingInvite = false;
     const slots = new Map();  // pid -> slot
 
     // ---- the game runs whether or not a phone ever shows up -----------------
@@ -290,6 +294,9 @@
       $('livesBox').style.display = !duel && hud.status !== 'lobby' ? 'flex' : 'none';
       $('matchSetup').style.display = active ? 'none' : 'grid';
       $('durationLabel').hidden = !duel;
+      $('modeSelect').value = hud.mode || 'solo';
+      $('invitePlayer').disabled = !host || sharingInvite || hud.playerCount !== 1;
+      $('invitePlayer').textContent = (hud.playerCount ?? 0) >= 2 ? 'Both players connected' : 'Invite second player';
       $('lobby').style.display = hud.status === 'lobby' && (duel || !connected) ? 'flex' : 'none';
       $('ready').style.display = hud.status === 'lobby' && connected && !duel ? 'flex' : 'none';
       const players = Object.values(hud.wizards || {});
@@ -305,6 +312,15 @@
     $('modeSelect').onchange = () => game.configureMatch($('modeSelect').value, Number($('durationSelect').value));
     $('durationSelect').onchange = () => game.configureMatch($('modeSelect').value, Number($('durationSelect').value));
     $('startMatch').onclick = () => game.start();
+    $('invitePlayer').onclick = async () => {
+      if (!host || sharingInvite || game.playerCount !== 1 || !['lobby', 'over'].includes(game.state)) return;
+      if (latestHud.mode !== 'duel') game.configureMatch('duel', Number($('durationSelect').value));
+      sharingInvite = true; renderMatch(latestHud);
+      try {
+        $('inviteNotice').textContent = await sharePlayerInvite(host.code, location.href);
+        $('inviteNotice').hidden = !$('inviteNotice').textContent;
+      } finally { sharingInvite = false; renderMatch(latestHud); }
+    };
 
     function renderLives(lives) {
       const box = $("livesBox");
@@ -482,6 +498,9 @@
           if (!slots.has(pid)) return;
           if (type === "start" && (game.state === "lobby" || game.state === "over")) game.start();
           else if (type === "again" && game.state === "over") game.start();
+          else if (type === 'invite' && latestHud.mode !== 'duel' && ['lobby', 'over'].includes(game.state)) {
+            game.configureMatch('duel', Number($('durationSelect').value));
+          }
         },
       });
       host.setHud(latestHud);

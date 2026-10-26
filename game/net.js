@@ -154,6 +154,7 @@ export async function createHost({ onJoin, onLeave, onBlade, onCmd, launch } = {
 // CONTROLLER - the phone. Streams the blade, reads the HUD.
 // ---------------------------------------------------------------------------
 export async function createController(code, { onHud, onStatus, onClosed } = {}) {
+  if (!/^\d{6}$/.test(code || '')) throw new Error('No valid room code in the link.');
   const base = "rooms/" + code;
   const snap = await get(ref(db, base));
   if (!snap.exists()) throw new Error("That game is over. Scan the QR on the screen again.");

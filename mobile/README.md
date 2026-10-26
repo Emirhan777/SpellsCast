@@ -37,6 +37,24 @@ After changing game code, run `npm run build:device-game`;
 `npm run check:device-game` verifies the generated bundle. Production builds
 regenerate the offline bundle automatically.
 
+## Invite a second player online
+
+Connect your wand to an open game, then tap **Invite second player** on the
+connected screen or wand controls before a round. The share sheet sends that
+room's player link and prepares the screen for **Wizard duel**. The recipient
+can play in their browser or choose **Open in SpellsCast** to use the iOS app.
+Keep the game screen open; the link joins that room rather than starting a new one.
+Once both players connect, choose **Start duel**.
+
+Sharing keeps your wand connected while the share sheet is open. A real network
+disconnect still requires reconnecting. Full rooms disable invitations, and
+invitations are hidden during a round. If sharing is unavailable, the app offers
+a selectable link and **Copy invite link**. The offline on-device game has no
+online room to invite players into.
+
+The invite button is in the development source and is not included in published
+App Store version **1.2.0 (9)**.
+
 ## Try it in Expo Go
 
 From this directory:

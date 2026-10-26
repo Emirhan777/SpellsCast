@@ -123,6 +123,8 @@
     }
     button.act:active { background: rgba(255,255,255,0.18); }
     button.act.primary { background: var(--accent); color: #06222b; }
+    button.act:disabled { opacity: .45; cursor: default; }
+    #inviteIntro { flex: 0; }
 
     #conn { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--dim); font-weight: 600; }
     #conn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); }
@@ -139,6 +141,8 @@
     <button id="playBtn">PLAY</button>
     <p class="muted" id="introNote">room <b id="roomText">—</b></p>
     <a id="nativeAppLink" hidden style="color:#bfa6e6;font-size:13px">Have the iOS app? Open in SpellsCast</a>
+    <button class="act" id="inviteIntro" hidden>Invite second player</button>
+    <p class="muted" id="inviteIntroNotice" role="status" hidden></p>
   </div>
 
   <!-- 2. the controller -->
@@ -168,6 +172,8 @@
         <button class="act primary" id="againBtn">Play again</button>
       </div>
       <div id="conn"><span class="dot"></span><span id="connText">connecting…</span></div>
+      <button class="act" id="invitePlayer" hidden>Invite second player</button>
+      <p class="muted" id="inviteNotice" role="status" hidden></p>
     </div>
   </div>
 
@@ -181,6 +187,7 @@
     import { createController } from "./game/net.js";
     import { createTracker } from "./game/tilt.js";
     import { SPELLS, drawGlyph } from "./game/spells.js";
+    import { sharePlayerInvite } from "./game/share-invite.js";
 
     const $ = (id) => document.getElementById(id);
     const show = (id) => ["intro", "ctrl", "fail"].forEach((s) => $(s).classList.toggle("on", s === id));
@@ -188,7 +195,7 @@
 
     const params = new URLSearchParams(location.search);
     const code = params.get("room");
-    if (!code) fail("No room code in the link.");
+    if (!/^\d{6}$/.test(code || '')) fail('No valid room code in the link.');
     $("roomText").textContent = code || "—";
 
     // PenDraw's mapping: alpha -> x, beta -> y, nothing else. See game/tilt.js.
@@ -197,6 +204,7 @@
     let mode = null;            // "tilt" | "touch"
     let lastStatus = null;
     let latestHud = {}, castMsgTimer = 0;
+    let sharingInvite = false;
     let wakeLock = null;
 
     // The thumb. Everything about casting reduces to this one boolean and the
@@ -250,6 +258,7 @@
       ctrl = await createController(code, {
         onHud(hud) {
           latestHud = hud;
+          renderInvite();
           $("scoreVal").textContent = hud.score ?? 0;
           renderLives(hud.lives ?? 3);
           const duel = hud.mode === 'duel';
@@ -262,10 +271,12 @@
         },
         onStatus(status) {
           lastStatus = status;
+          renderInvite();
           paintStatus(status);
         },
-        onClosed() { fail("The big screen closed the game."); },
+        onClosed() { ctrl?.destroy(); ctrl = null; renderInvite(); fail("The big screen closed the game."); },
       });
+      renderInvite();
       setConn(true, "connected to room " + code);
       playBtn.disabled = false;
       playBtn.style.filter = "";
@@ -275,6 +286,7 @@
       nativeLink.hidden = false;
       nativeLink.onclick = () => {
         ctrl?.destroy(); ctrl = null;
+        renderInvite();
         playBtn.textContent = "Reconnect in browser";
       };
     } catch (e) {
@@ -285,6 +297,30 @@
       $("conn").classList.toggle("live", on);
       $("connText").textContent = text;
     }
+
+    function renderInvite() {
+      const idle = ['lobby', 'over'].includes(latestHud.status || lastStatus);
+      const full = (latestHud.playerCount ?? (latestHud.matchReady ? 2 : 1)) >= 2;
+      for (const id of ['inviteIntro', 'invitePlayer']) {
+        $(id).hidden = !ctrl || !idle;
+        $(id).disabled = full || sharingInvite;
+        $(id).textContent = full ? 'Both players connected' : 'Invite second player';
+      }
+      if (!ctrl || !idle || full) for (const id of ['inviteIntroNotice', 'inviteNotice']) $(id).hidden = true;
+    }
+    async function invitePlayer() {
+      if (!ctrl || sharingInvite || (latestHud.playerCount ?? 0) >= 2 || !['lobby', 'over'].includes(latestHud.status || lastStatus)) return;
+      endCast(); ctrl.sendCmd('invite');
+      sharingInvite = true; renderInvite();
+      try {
+        const notice = await sharePlayerInvite(code, location.href);
+        for (const id of ['inviteIntroNotice', 'inviteNotice']) {
+          $(id).textContent = notice; $(id).hidden = !notice;
+        }
+      } finally { sharingInvite = false; renderInvite(); }
+    }
+    $('inviteIntro').onclick = invitePlayer;
+    $('invitePlayer').onclick = invitePlayer;
 
     function renderLives(lives) {
       const box = $("hudLives");
