@@ -1,6 +1,14 @@
 SpellsCast includes a full offline iPhone game, standalone rune practice, and a controller for the companion browser game. No login, purchase, subscription, or account is required.
 
-To review the new on-device game without another screen:
+To review the new second-player invitations:
+1. Open https://emirhan777.github.io/SpellsCast/ on a separate computer and keep that screen open.
+2. Connect the iPhone using Join an existing game and the QR or six-digit room code. No account is required.
+3. Before starting a round, tap Invite second player on the connected screen or online wand controls. The native share sheet contains a link to this same room. The computer switches to Wizard duel.
+4. Send the invite to a second phone, or copy it. The recipient can use the browser controller or choose Open in SpellsCast to use the installed app. The first phone remains connected while sharing; a real network disconnection still requires reconnecting.
+5. Both players connected replaces the invite button when the room is full. Select Start duel. Invitations are hidden during an active round; no third player can join.
+6. If a system share sheet is unavailable, a dialog provides Copy invite link and a selectable URL. The offline on-device game remains solo.
+
+To review the on-device game without another screen:
 1. Choose Play on this device. The game opens in landscape.
 2. Tilt is selected by default. Hold anywhere on the game screen, allow motion if prompted, tilt through a displayed rune, then release. The first recognized spell starts a round. A tap or permission approval alone does not start play.
 3. To test without sensors, choose Finger mode in the top menu. Draw the red V-shaped Expel rune directly on the screen and lift your finger. This starts the game. Keep casting runes matching the targets.
