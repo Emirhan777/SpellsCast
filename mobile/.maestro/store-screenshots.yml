@@ -44,4 +44,6 @@ appId: com.emirhansimsek.spellscast
 - extendedWaitUntil:
     visible: Hold anywhere. Cast to begin.
     timeout: 30000
+- waitForAnimationToEnd:
+    timeout: 10000
 - takeScreenshot: 07-landscape-game
