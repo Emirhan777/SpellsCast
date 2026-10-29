@@ -15,7 +15,11 @@ build:
           node scripts/capture-landscape-screenshot.cjs
     - run:
         name: Install simulator gesture tools
-        command: brew install facebook/fb/idb
+        command: |
+          brew trust --formula facebook/fb/idb
+          brew trust --formula facebook/fb/idb-cli
+          brew trust --formula facebook/fb/idb-companion
+          brew install facebook/fb/idb
     - run:
         name: Record real gameplay using touch input
         command: node scripts/record-store-gameplay.cjs

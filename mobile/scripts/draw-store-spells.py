@@ -7,7 +7,8 @@ from pathlib import Path
 import subprocess
 import sys
 from idb.grpc.client import Client
-from idb.common.types import TCPAddress, HIDDelay, HIDDirection, HIDPress, HIDTouch, Point
+from idb.common.types import (TCPAddress, HIDDelay, HIDDirection, HIDPress, HIDTouch, Point,
+    HIDOrientationType, AccessibilityBackend, AccessibilityMarker, AccessibilityInfoOptions)
 
 folder = Path('artifacts/screenshots')
 spells = json.loads((folder / 'spells.json').read_text())
@@ -33,9 +34,44 @@ async def draw(client, glyph, transform):
 
 async def main():
     async with Client.build(address=TCPAddress(host='127.0.0.1', port=10882), logger=logging.getLogger('capture')) as client:
-        # idb reports simulator coordinates in its current orientation.
-        transform = lambda x, y: (x, y)
-        await draw(client, spells[0]['glyph'], transform)
+        backend = AccessibilityBackend.AXBRIDGE_PERSISTENT
+        marker = lambda text: AccessibilityMarker(value=text, depth=100)
+        async def snapshot(name):
+            info = await client.accessibility_info(target=None, options=AccessibilityInfoOptions(backend=backend))
+            (folder / (name + '.json')).write_text(info.json)
+            return info.json
+        if '--prepare' in sys.argv:
+            # The app locks its UI in landscape; rotate the simulated device too.
+            print('Initial physical orientation:', await client.get_orientation(), flush=True)
+            await client.set_orientation(HIDOrientationType.LANDSCAPE_LEFT)
+            await asyncio.sleep(2)
+            await snapshot('before-mode-selection')
+            try:
+                await client.accessibility_tap(marker('Casting game mode'), backend=backend)
+                await asyncio.sleep(1)
+                await snapshot('mode-picker')
+                await client.accessibility_tap(marker('Finger mode'), backend=backend)
+                await asyncio.sleep(1)
+                if await client.accessibility_wait(marker('Done'), timeout=1, backend=backend):
+                    await client.accessibility_tap(marker('Done'), backend=backend)
+                if not await client.accessibility_wait(marker('Draw a spell to begin.'), timeout=10, backend=backend):
+                    raise RuntimeError('Finger mode did not become ready')
+                await snapshot('finger-ready')
+            finally:
+                screenshot('mode-selection-result.png')
+            return
+        transforms = [lambda x, y: (x, y), lambda x, y: (440 - y, x), lambda x, y: (y, 956 - x)]
+        for index, candidate in enumerate(transforms):
+            await draw(client, spells[0]['glyph'], candidate)
+            await asyncio.sleep(.8)
+            tree = await snapshot(f'first-cast-{index}')
+            if 'Draw a spell to begin.' not in tree:
+                transform = candidate
+                print('Touch coordinate transform:', index, flush=True)
+                break
+        else:
+            screenshot('cast-not-recognized.png')
+            raise RuntimeError('No real cast started the round; footage is not ready')
         await asyncio.sleep(3.6)
         for i in range(36):
             spell = spells[i % len(spells)]

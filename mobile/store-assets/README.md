@@ -1,5 +1,30 @@
 # App Store screenshots
 
+## Version 1.2.2 screenshots and gameplay preview (October 30, 2026)
+
+[The current media set](1.2.2/) contains six screenshots and a 23-second
+[gameplay preview](1.2.2/122-gameplay-preview.mp4). The first three images show
+actual Finger-mode gameplay; the remaining images show Tilt instructions, the
+home options, and offline spell practice.
+
+The footage was captured from the standalone 1.2.2 iOS app on an iPhone 18 Pro
+Max simulator running iOS 27.0. Real touch strokes start the game and cast its
+runes; no gameplay or scores were overridden. The preview shows a continuous
+23-second section of that recording, resized to 1920 x 886 at 30 fps with
+H.264 High/level 4.0 encoding and SDR Rec.709 color. Sound was off in the app;
+the exported video has a silent AAC stereo track and no added music.
+
+Screenshots are RGB PNGs at 2868 x 1320 or 1320 x 2868. Video frames were used
+for the three action screenshots; the other views came from native screenshots.
+All six images and representative video frames were visually inspected, and
+the complete encoded video decoded successfully. [The manifest](1.2.2/manifest.json)
+records dimensions, checksums, capture jobs and the signed production build.
+
+Xcode 27 uses Device Hub in place of Simulator.app. The capture launcher detects
+both. The recording uses idb accessibility controls to select Finger mode and
+HID touch events to draw. For current upload and review status, see
+[APP-STORE.md](../APP-STORE.md).
+
 ## Version 1.2.0 capture (October 25, 2026)
 
 Six refreshed portrait screenshots are archived in [screenshots/1.2.0/en-US/6.9-inch](screenshots/1.2.0/en-US/6.9-inch/). They are unedited 1320 x 2868 RGB PNGs from an iPhone 18 Pro Max simulator, captured from the standalone 1.2.0 simulator app compiled by build `dd678cb8-d20d-422d-986b-d06fd0a56098`. Capture job `c283be61-90a9-435b-863a-c61e20ef47e9` reused that app. Provenance is stored with the images.

@@ -1,0 +1,64 @@
+{
+  "version": "1.2.2",
+  "visuallyVerified": true,
+  "bundleIdentifier": "com.emirhansimsek.spellscast",
+  "device": "iPhone 18 Pro Max, iOS 27.0 Simulator",
+  "nativeSimulatorBuild": "1f90c975-5c6d-4dc7-8e2e-3c5ab28f3e22",
+  "captureBuilds": [
+    "b28d0dbf-d123-418b-ae5c-e1982212818f",
+    "4fb64238-69bb-4d47-a0f3-a90f2afe43cd"
+  ],
+  "productionBuild": "99341a1f-b512-45cd-a23d-769398607111",
+  "productionBuildNumber": "11",
+  "screenshots": [
+    {
+      "file": "122-01-spells-in-action.png",
+      "width": 2868,
+      "height": 1320,
+      "sha256": "36208fb9bf1099d45990460ba8dca7489f6249e84304edbd7040332d2d154119"
+    },
+    {
+      "file": "122-02-levitate.png",
+      "width": 2868,
+      "height": 1320,
+      "sha256": "82442e894da883d4034cb4165dc2f8f9e7995666f70ab0e00980ed0a9e71be0d"
+    },
+    {
+      "file": "122-03-expel.png",
+      "width": 2868,
+      "height": 1320,
+      "sha256": "98f61a6fa1a58732682936b3e872f1ad2f11aac8f01d5231de30849273abba4d"
+    },
+    {
+      "file": "122-04-tilt-mode.png",
+      "width": 2868,
+      "height": 1320,
+      "sha256": "e1dd1e4f5d94acb32ffc6c548e4ac2063a3a92585df34d84af1c54e802bed3c2"
+    },
+    {
+      "file": "122-05-play-options.png",
+      "width": 1320,
+      "height": 2868,
+      "sha256": "ac26a023890ec9c15fd1bd252e06238f8ba36d6d09a47179c45f97e349dca95d"
+    },
+    {
+      "file": "122-06-practice.png",
+      "width": 1320,
+      "height": 2868,
+      "sha256": "aa761dc9a17836afb24a3dfca34bed86bdf8702779fc8fc044cd6a358ca249df"
+    }
+  ],
+  "preview": {
+    "file": "122-gameplay-preview.mp4",
+    "sha256": "64bb979b7e151bd6e1b1319a25acd43063666a94515e4565028327d3834ca317",
+    "width": 1920,
+    "height": 886,
+    "durationSeconds": 23,
+    "framesPerSecond": 30,
+    "video": "H.264 High, level 4.0, SDR Rec.709",
+    "audio": "Silent AAC stereo, 48 kHz; game sound was off",
+    "posterTimeCode": "00:00:09:06",
+    "sourceStartSeconds": 6.3,
+    "source": "Real native iOS Simulator screen recording; real HID touch strokes; gameplay and scores unmodified"
+  }
+}
