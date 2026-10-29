@@ -1,0 +1,24 @@
+build:
+  name: Capture native iOS gameplay and screenshots
+  steps:
+    - eas/build
+    - eas/install_maestro
+    - run:
+        name: Prepare iPhone and capture current app screens
+        command: |
+          node scripts/prepare-ios-screenshots.cjs
+          node scripts/open-capture-simulator.cjs
+          maestro --device "$(cat artifacts/screenshots/device-udid.txt)" test --test-output-dir artifacts/screenshots/maestro .maestro/store-screenshots.yml
+          node scripts/capture-landscape-screenshot.cjs
+    - run:
+        name: Install simulator gesture tools
+        command: brew install facebook/fb/idb
+    - run:
+        name: Record real gameplay using touch input
+        command: node scripts/record-store-gameplay.cjs
+    - eas/upload_artifact:
+        name: Upload unedited iOS recordings and screenshots
+        if: ${ always() }
+        inputs:
+          type: build-artifact
+          path: mobile/artifacts/screenshots

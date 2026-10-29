@@ -1,10 +1,22 @@
 # App Store release preparation
 
-## Submitted update: 1.2.1 (build 10), October 26, 2026
+## Store media update: 1.2.2 (in preparation, October 30, 2026)
 
-**Apple status: WAITING_FOR_REVIEW.** Submitted October 26 at 21:29 Istanbul.
-The update releases automatically after approval (`AFTER_APPROVAL`). Version
-1.2.0 (9) remains the live release until Apple approves this update.
+Version 1.2.1 (10) is live. Version 1.2.2 is being prepared with current native
+screenshots and a gameplay App Preview. The editable Apple version is
+`dd8ccfe9-5ccd-4ac7-87c8-0bdbda22f724`, configured for automatic release after
+approval. This preparation is not a submission or publication confirmation.
+
+The `store-media` EAS profile builds the standalone iOS simulator app, captures
+its screens with Maestro, and records real touch-driven gameplay using idb and
+`simctl`. `store-media-reuse` repeats capture from a simulator archive provided
+through `SCREENSHOT_APP_ARCHIVE_URL` in that build's environment. Capture tools
+do not change gameplay or scores. Inspect all footage before uploading.
+
+## Published update: 1.2.1 (build 10)
+
+**Apple status: READY_FOR_DISTRIBUTION**, verified October 30. Submitted
+October 26 at 21:29 Istanbul and released automatically after approval.
 
 - Production build: [0d1c0a23-5d99-4c10-b74b-41c42041dcfa](https://expo.dev/accounts/emirhansimsek_lightning/projects/spellscast/builds/0d1c0a23-5d99-4c10-b74b-41c42041dcfa), source commit `70f1ec2`.
 - The downloaded signed IPA verifies bundle `com.emirhansimsek.spellscast`, version 1.2.1, build 10, landscape-right support and the invitation UI in its JavaScript bundle.
@@ -19,7 +31,7 @@ Full rooms disable invitations; unavailable sharing falls back to a copy-link
 dialog. Short screens use one row of spell cards so casting and invite controls
 remain accessible. Offline on-device play is still solo.
 
-This feature is **not included in the live 1.2.0 (9) build**. Lint, typecheck, all twelve
+This feature is included in live version **1.2.1 (10)**. Lint, typecheck, all twelve
 native unit tests, the web export, offline bundle consistency, gameplay tests
 and live Firebase relay checks passed. Browser integration verified the same-room
 second slot, third-player rejection, host closure and share/copy fallbacks. The

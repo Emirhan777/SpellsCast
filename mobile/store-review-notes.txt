@@ -1,6 +1,9 @@
 SpellsCast includes an offline iPhone game, rune practice, and a controller for its companion browser game. No account, purchase, subscription, or login is required.
 
-NEW IN 1.2.1: INVITE A SECOND PLAYER
+VERSION 1.2.2
+This release refreshes the store screenshots and gameplay preview. The preview shows real on-device Finger mode; Tilt mode uses the iPhone's motion sensors. Gameplay and the invitation feature are unchanged from 1.2.1.
+
+INVITE A SECOND PLAYER
 1. Open https://emirhan777.github.io/SpellsCast/ on a separate computer and keep it open. Click the page once to enable its audio.
 2. On the iPhone, choose Join an existing game. Scan the computer's QR (allow camera access) or enter its six-digit room code.
 3. Before starting a round, tap Invite second player on the connected screen or wand controls. The native share sheet contains a link to this same room. The computer switches to Wizard duel.
