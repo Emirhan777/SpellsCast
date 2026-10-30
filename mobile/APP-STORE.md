@@ -11,6 +11,8 @@ duel screenshot. All seven screenshots are uploaded and complete; the 28-second
 video has uploaded and is processing. Its editable Apple version is
 `a93ce427-2ce9-41e1-ad8f-964557f2f3dc`, configured for automatic release after
 approval. **This version has not been submitted or published.**
+Apple accepted the preview cover at `00:00:09:06`; its poster image is complete.
+Final video transcoding remains `PROCESSING`, without reported errors.
 
 EAS rejected the final production build because this account's monthly free iOS
 build allowance is exhausted; its reported reset is November 1, 2026. Build
@@ -20,12 +22,15 @@ subsequent attempts failed during upload and then at the allowance check.
 After the reset or a plan upgrade, build the current source with the production
 profile, verify the resulting IPA's version/build, upload it, attach that exact
 build to 1.2.3, and submit. Normal automatic incrementing may choose build 13.
+The owner chose **wait for the free reset**, with no plan upgrade. No automatic
+build or submission has been scheduled.
 
 Capture QA found sideways strokes could invoke iOS back navigation on a
 controller opened through an invitation. The index route now disables that
 navigation gesture. This change still needs a new native build and a repeat
 invitation/casting check before submission. The final video contains only
 visually verified gameplay segments from the existing 1.2.2 native app.
+Lint, TypeScript and the offline game bundle consistency check pass.
 
 The repository `.easignore` preserves local credential exclusions and excludes
 browser music, store media and Git history from native build uploads. An archive

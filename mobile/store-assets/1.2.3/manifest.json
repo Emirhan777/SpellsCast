@@ -12,7 +12,7 @@
   ],
   "productionBuild": null,
   "productionBuildNumber": null,
-  "releaseStatus": "Build blocked by Expo monthly iOS allowance; not submitted",
+  "releaseStatus": "Owner chose to wait for the free Expo iOS build allowance reset on November 1, 2026; no 1.2.3 binary uploaded or review submitted",
   "screenshots": [
     {
       "file": "../1.2.2/122-01-spells-in-action.png",
@@ -97,5 +97,15 @@
     "offlineBundleConsistency": "passed",
     "previewFullDecode": "passed",
     "invitationSwipeFixNativeRetest": "pending new native build"
+  },
+  "appStoreDelivery": {
+    "versionId": "a93ce427-2ce9-41e1-ad8f-964557f2f3dc",
+    "checkedAt": "2026-10-30T22:15:31.667Z",
+    "screenshots": "7 COMPLETE",
+    "previewId": "67c00019-6358-8748-810b-b5c265978ce5",
+    "previewUploadState": "COMPLETE",
+    "previewVideoState": "PROCESSING",
+    "posterTimeCode": "00:00:09:06",
+    "posterState": "COMPLETE"
   }
 }
