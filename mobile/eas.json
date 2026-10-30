@@ -22,6 +22,10 @@
       "extends": "screenshots",
       "config": "store-media-reuse.yml"
     },
+    "store-duel-reuse": {
+      "extends": "screenshots",
+      "config": "store-duel-reuse.yml"
+    },
     "screenshots-reuse": {
       "extends": "screenshots",
       "config": "screenshots-reuse.yml"

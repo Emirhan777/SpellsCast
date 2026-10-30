@@ -40,6 +40,22 @@ async def main():
             info = await client.accessibility_info(target=None, options=AccessibilityInfoOptions(backend=backend))
             (folder / (name + '.json')).write_text(info.json)
             return info.json
+        if '--duel' in sys.argv:
+            tree = json.loads(await snapshot('online-controller'))
+            pad = next(node['frame'] for node in tree if node.get('AXUniqueId') == 'cast-pad' or node.get('AXLabel') == 'Draw a spell rune here')
+            scale = min(pad['width'], pad['height']) * .7
+            def transform(x, y):
+                return (pad['x'] + pad['width'] / 2 + (x - 478) * scale / 240,
+                        pad['y'] + pad['height'] / 2 + (y - 215) * scale / 240)
+            for i in range(20):
+                await draw(client, spells[i % len(spells)]['glyph'], transform)
+                await asyncio.sleep(.15)
+                if i in [3, 7, 11, 15, 19]:
+                    screenshot(f'online-duel-{i:02d}.png')
+            final = await snapshot('online-controller-final')
+            if 'cast-pad' not in final or 'WIZARD' not in final:
+                raise RuntimeError('The online controller left the room during capture')
+            return
         if '--prepare' in sys.argv:
             # The app locks its UI in landscape; rotate the simulated device too.
             print('Initial physical orientation:', await client.get_orientation(), flush=True)

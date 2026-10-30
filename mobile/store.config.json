@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.2.2",
+    "version": "1.2.3",
     "copyright": "2026 Emirhan Şimşek",
     "categories": [
       [
@@ -16,7 +16,7 @@
         "title": "SpellsCast",
         "subtitle": "Your phone becomes a wand",
         "promoText": "Turn your phone to a magic wand",
-        "releaseNotes": "Explore SpellsCast with refreshed screenshots and a new gameplay preview. Play on your iPhone in landscape, draw spells directly in Finger mode, or invite a second wizard to your online room.",
+        "releaseNotes": "Prevent sideways casting gestures from dismissing the controller after opening an invitation. See SpellsCast in action with an updated preview of on-device play and online wizard duels.",
         "description": "Your iPhone is the wand and the game screen. Play offline on your phone, mirror the action to your TV, or connect to the companion game on another screen.\n\nPLAY ON YOUR IPHONE\nChoose Play on this device for the full offline game in landscape. Hold anywhere, tilt through a displayed rune, then release. Your first spell starts the game. Cast again after game over to play another round.\n\nTILT OR FINGER\nTilt mode is selected by default. Choose Finger mode to draw directly on the game screen. Each mode keeps its own best score on your device. Switching modes starts a fresh round.\n\nMIRROR TO YOUR TV\nBuilt-in guides explain iPhone Screen Mirroring with AirPlay and compatible HDMI adapters. The TV mirrors your landscape game while you cast on your phone. Wireless mirroring and display borders depend on your devices.\n\nPLAY ON ANOTHER SCREEN\nSend a game link by Messages, email, AirDrop to a Mac, or another sharing app. Open it on a computer to connect automatically. You can also scan the game QR or enter a room code. Use motion or touch controls as your phone becomes the wand.\n\nCHALLENGE A FRIEND\nConnect your phone to an online room, then tap Invite second player to share that same game with a friend. Your friend can join from their browser or the SpellsCast app. Keep the game screen open and choose Start duel when both phones are connected. The first correct cast received by the game claims each target for one point. The highest score wins when time runs out.\n\nLEARN FOUR SPELLS\nExpel rogue mages, levitate feathers, banish ghosts, and shatter serpents. Offline practice helps you learn every rune.\n\nLocal play and practice work without internet or another screen. Connected play requires internet and a computer or compatible TV browser displaying https://emirhan777.github.io/SpellsCast/. No player account is required.",
         "keywords": [
           "wand",

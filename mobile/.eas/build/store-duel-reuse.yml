@@ -1,0 +1,29 @@
+build:
+  name: Capture a real online duel in the native iOS app
+  steps:
+    - eas/checkout
+    - eas/install_maestro
+    - run:
+        name: Prepare the native app
+        command: |
+          node scripts/download-simulator-app.cjs
+          node scripts/prepare-ios-screenshots.cjs artifacts/simulator-app
+          node scripts/open-capture-simulator.cjs
+    - run:
+        name: Install gesture capture tools
+        command: |
+          brew trust --formula facebook/fb/idb
+          brew trust --formula facebook/fb/idb-cli
+          brew trust --formula facebook/fb/idb-companion
+          brew install facebook/fb/idb
+          npm install --prefix /tmp/spellscast-capture-tools playwright@1.62.1
+          node /tmp/spellscast-capture-tools/node_modules/playwright/cli.js install chromium --only-shell
+    - run:
+        name: Join and record the online room
+        command: node scripts/record-store-duel.cjs
+    - eas/upload_artifact:
+        name: Upload native multiplayer footage
+        if: ${ always() }
+        inputs:
+          type: build-artifact
+          path: mobile/artifacts/screenshots

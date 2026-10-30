@@ -1,0 +1,34 @@
+# Preserve exclusions from both repository and mobile .gitignore files.
+.git
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.pem
+.env*.local
+*.tsbuildinfo
+/mobile/ios/
+/mobile/android/
+dist-ios/
+artifacts/
+store.local.json
+__pycache__/
+
+# Store media and browser music are not inputs to the native app build.
+/mobile/store-assets/
+/assets/music/

@@ -1,0 +1,32 @@
+appId: com.emirhansimsek.spellscast
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: join-game-button
+    timeout: 60000
+- tapOn:
+    id: join-game-button
+- scrollUntilVisible:
+    element:
+      id: room-code
+    direction: DOWN
+- tapOn:
+    id: room-code
+- inputText: ${CAPTURE_ROOM}
+- tapOn:
+    id: connect-button
+- extendedWaitUntil:
+    visible: Use touch controls
+    timeout: 60000
+- tapOn: Use touch controls
+- takeScreenshot: 122-online-invite
+- extendedWaitUntil:
+    visible: Both players connected
+    timeout: 60000
+- takeScreenshot: 122-online-ready
+- tapOn: Start duel
+- extendedWaitUntil:
+    notVisible: Start duel
+    timeout: 20000

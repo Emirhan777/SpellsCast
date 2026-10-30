@@ -1,7 +1,7 @@
 SpellsCast includes an offline iPhone game, rune practice, and a controller for its companion browser game. No account, purchase, subscription, or login is required.
 
-VERSION 1.2.2
-This release refreshes the store screenshots and gameplay preview. The preview shows real on-device Finger mode; Tilt mode uses the iPhone's motion sensors. Gameplay and the invitation feature are unchanged from 1.2.1.
+VERSION 1.2.3
+This release refreshes the store screenshots and gameplay preview. The preview mainly shows real on-device Finger mode, followed by the native controller in an online two-player duel. Offline on-device play remains solo. Tilt mode uses the iPhone's motion sensors. The controller disables iOS swipe-back navigation so sideways rune strokes do not dismiss a room opened from an invitation. Use Leave room to exit.
 
 INVITE A SECOND PLAYER
 1. Open https://emirhan777.github.io/SpellsCast/ on a separate computer and keep it open. Click the page once to enable its audio.

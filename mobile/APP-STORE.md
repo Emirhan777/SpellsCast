@@ -1,17 +1,45 @@
 # App Store release preparation
 
-## Store media update: 1.2.2 (in preparation, October 30, 2026)
+## Multiplayer preview update: 1.2.3 (build blocked, October 31, 2026)
 
-Version 1.2.1 (10) is live. Version 1.2.2 is being prepared with current native
-screenshots and a gameplay App Preview. The editable Apple version is
-`dd8ccfe9-5ccd-4ac7-87c8-0bdbda22f724`, configured for automatic release after
-approval. This preparation is not a submission or publication confirmation.
+Version 1.2.2 (11) is live with six refreshed screenshots and a 23-second native
+on-device gameplay preview. App Store Connect verified all seven assets as
+complete on October 31. Its version ID is `dd8ccfe9-5ccd-4ac7-87c8-0bdbda22f724`.
+
+Version 1.2.3 adds a brief native online-duel view to the preview and an online
+duel screenshot. All seven screenshots are uploaded and complete; the 28-second
+video has uploaded and is processing. Its editable Apple version is
+`a93ce427-2ce9-41e1-ad8f-964557f2f3dc`, configured for automatic release after
+approval. **This version has not been submitted or published.**
+
+EAS rejected the final production build because this account's monthly free iOS
+build allowance is exhausted; its reported reset is November 1, 2026. Build
+number 12 is reserved remotely but no valid 1.2.3 binary has been delivered to
+Apple. The earlier queued build `213cdc5a-9839-42eb-8f6b-3bdab306ebd7` was canceled;
+subsequent attempts failed during upload and then at the allowance check.
+After the reset or a plan upgrade, build the current source with the production
+profile, verify the resulting IPA's version/build, upload it, attach that exact
+build to 1.2.3, and submit. Normal automatic incrementing may choose build 13.
+
+Capture QA found sideways strokes could invoke iOS back navigation on a
+controller opened through an invitation. The index route now disables that
+navigation gesture. This change still needs a new native build and a repeat
+invitation/casting check before submission. The final video contains only
+visually verified gameplay segments from the existing 1.2.2 native app.
+
+The repository `.easignore` preserves local credential exclusions and excludes
+browser music, store media and Git history from native build uploads. An archive
+inspection verified the app source, generated offline game, shared engine and
+assets remain present; the compressed upload decreased from 190 MB to 655 KB.
 
 The `store-media` EAS profile builds the standalone iOS simulator app, captures
 its screens with Maestro, and records real touch-driven gameplay using idb and
 `simctl`. `store-media-reuse` repeats capture from a simulator archive provided
 through `SCREENSHOT_APP_ARCHIVE_URL` in that build's environment. Capture tools
 do not change gameplay or scores. Inspect all footage before uploading.
+`store-duel-reuse` runs a real web host and second controller on the same capture
+machine, joins the native app, and records actual online casting. Only native
+app footage is included in the App Preview.
 
 ## Published update: 1.2.1 (build 10)
 
