@@ -1,0 +1,28 @@
+build:
+  name: Verify invitation casting in the release source
+  steps:
+    - eas/build
+    - eas/install_maestro
+    - run:
+        name: Prepare the current native app
+        command: |
+          node scripts/prepare-ios-screenshots.cjs
+          node scripts/open-capture-simulator.cjs
+    - run:
+        name: Install native gesture and room tools
+        command: |
+          brew trust --formula facebook/fb/idb
+          brew trust --formula facebook/fb/idb-cli
+          brew trust --formula facebook/fb/idb-companion
+          brew install facebook/fb/idb
+          npm install --prefix /tmp/spellscast-capture-tools playwright@1.62.1
+          node /tmp/spellscast-capture-tools/node_modules/playwright/cli.js install chromium --only-shell
+    - run:
+        name: Open invitation and cast twenty runes without leaving the controller
+        command: node scripts/record-store-duel.cjs --verify-invite
+    - eas/upload_artifact:
+        name: Upload native verification evidence
+        if: ${ always() }
+        inputs:
+          type: build-artifact
+          path: mobile/artifacts/screenshots

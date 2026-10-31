@@ -26,6 +26,10 @@
       "extends": "screenshots",
       "config": "store-duel-reuse.yml"
     },
+    "verify-invite": {
+      "extends": "screenshots",
+      "config": "verify-invite.yml"
+    },
     "screenshots-reuse": {
       "extends": "screenshots",
       "config": "screenshots-reuse.yml"

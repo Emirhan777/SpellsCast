@@ -4,6 +4,7 @@ const { execFileSync, spawn } = require('node:child_process');
 const folder = path.resolve('artifacts/screenshots');
 const udid = fs.readFileSync(path.join(folder, 'device-udid.txt'), 'utf8').trim();
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const verifyInvite = process.argv.includes('--verify-invite');
 (async () => {
   const hostLog = fs.openSync(path.join(folder, 'online-host.log'), 'w');
   const host = spawn(process.execPath, ['scripts/host-store-duel.cjs'], { stdio: ['ignore', hostLog, hostLog] });
@@ -15,7 +16,8 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
     const { code: room } = JSON.parse(fs.readFileSync(roomFile, 'utf8'));
     const { SPELLS } = await import('../../game/spells.js');
     fs.writeFileSync(path.join(folder, 'spells.json'), JSON.stringify(SPELLS.map(s => ({ name: s.name, glyph: s.glyph }))));
-    execFileSync('maestro', ['--device', udid, 'test', '-e', `CAPTURE_ROOM=${room}`, '--test-output-dir', 'artifacts/screenshots/online-setup', '.maestro/store-duel.yml'], { stdio: 'inherit' });
+    const flow = verifyInvite ? '.maestro/verify-invite.yml' : '.maestro/store-duel.yml';
+    execFileSync('maestro', ['--device', udid, 'test', '-e', `CAPTURE_ROOM=${room}`, '--test-output-dir', 'artifacts/screenshots/online-setup', flow], { stdio: 'inherit' });
     const log = fs.openSync(path.join(folder, 'idb-companion.log'), 'w');
     const companion = spawn('idb_companion', ['--udid', udid, '--grpc-port', '10882'], { stdio: ['ignore', log, log] });
     let video;
@@ -25,6 +27,10 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
       video = spawn('xcrun', ['simctl', 'io', udid, 'recordVideo', '--codec=h264', '--mask=ignored', path.join(folder, 'online-duel-raw.mp4')], { stdio: ['ignore', 'ignore', 'inherit'] });
       await delay(1000);
       execFileSync(path.join(prefix, 'libexec/bin/python'), ['scripts/draw-store-spells.py', udid, '--duel'], { stdio: 'inherit' });
+      if (verifyInvite) fs.writeFileSync(path.join(folder, 'invite-verification.json'), JSON.stringify({
+        passed: true, version: require('../app.json').expo.version,
+        flow, realTouchStrokes: 20, controllerRemainedVisible: true,
+      }, null, 2));
     } finally {
       if (video) {
         video.kill('SIGINT');

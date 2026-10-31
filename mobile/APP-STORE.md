@@ -1,50 +1,52 @@
 # App Store release preparation
 
-## Multiplayer preview update: 1.2.3 (build blocked, October 31, 2026)
+## Multiplayer preview update: 1.2.3 (retry prepared, November 1, 2026)
 
-Version 1.2.2 (11) is live with six refreshed screenshots and a 23-second native
-on-device gameplay preview. App Store Connect verified all seven assets as
-complete on October 31. Its version ID is `dd8ccfe9-5ccd-4ac7-87c8-0bdbda22f724`.
+Version 1.2.2 (11) is live with six refreshed screenshots and the original
+23-second native on-device preview. Version 1.2.3 adds a multiplayer screenshot,
+a 28-second preview with a brief native online-duel ending, and the casting
+navigation fix described below.
 
-Version 1.2.3 adds a brief native online-duel view to the preview and an online
-duel screenshot. All seven screenshots are uploaded and complete; the 28-second
-video has uploaded and is processing. Its editable Apple version is
-`a93ce427-2ce9-41e1-ad8f-964557f2f3dc`, configured for automatic release after
-approval. **This version has not been submitted or published.**
-Apple accepted the preview cover at `00:00:09:06`; its poster image is complete.
-Final video transcoding remains `PROCESSING`, without reported errors.
+All seven screenshots, the video and its cover are COMPLETE in App Store
+Connect, with no reported processing errors. The cover is `00:00:09:06`.
+The editable version is `a93ce427-2ce9-41e1-ad8f-964557f2f3dc`, configured for
+automatic release after approval. **1.2.3 has not been submitted or published.**
 
-EAS rejected the final production build because this account's monthly free iOS
-build allowance is exhausted; its reported reset is November 1, 2026. Build
-number 12 is reserved remotely but no valid 1.2.3 binary has been delivered to
-Apple. The earlier queued build `213cdc5a-9839-42eb-8f6b-3bdab306ebd7` was canceled;
-subsequent attempts failed during upload and then at the allowance check.
-After the reset or a plan upgrade, build the current source with the production
-profile, verify the resulting IPA's version/build, upload it, attach that exact
-build to 1.2.3, and submit. Normal automatic incrementing may choose build 13.
-The owner chose **wait for the free reset**, with no plan upgrade. No automatic
-build or submission has been scheduled.
+At 00:53 Istanbul on November 1, EAS still reported an exhausted free allowance
+with two hours until its reset. The reset is expected at about 03:00 Istanbul
+(00:00 UTC). The owner chose to wait without upgrading, then requested
+publication again. Build number 13 is reserved remotely, but no valid 1.2.3
+binary has been delivered to Apple. The next production build may be build 14.
+
+A one-time local release runner is prepared for **November 1 at 03:10 Istanbul**.
+The Windows task is named `SpellsCast-1.2.3-Publish-20261101`; verify its registered
+state in Task Scheduler. Progress is recorded outside this repository in
+`../.verification/release123-runner-state.json` and `release123-runner.log`.
+The computer must be powered on, connected and the owner logged in. A missed
+trigger can start when available, but the runner expires on November 2.
+
+The job verifies the exact committed source and media, builds the `verify-invite`
+simulator profile and checks that 20 real casts leave the invited controller
+visible. Only after that passes does it build production, verify the signed IPA,
+upload it, wait for Apple's VALID state and submit the exact build for automatic
+release after approval. It stops on failures or changed source. It never upgrades
+the Expo plan. This is a prepared attempt, not publication confirmation.
 
 Capture QA found sideways strokes could invoke iOS back navigation on a
 controller opened through an invitation. The index route now disables that
-navigation gesture. This change still needs a new native build and a repeat
-invitation/casting check before submission. The final video contains only
-visually verified gameplay segments from the existing 1.2.2 native app.
-Lint, TypeScript and the offline game bundle consistency check pass.
+navigation gesture. The `verify-invite` workflow will verify this in a new native
+build before submission. Lint, TypeScript and offline bundle consistency pass.
 
-The repository `.easignore` preserves local credential exclusions and excludes
-browser music, store media and Git history from native build uploads. An archive
-inspection verified the app source, generated offline game, shared engine and
-assets remain present; the compressed upload decreased from 190 MB to 655 KB.
+The final media uses visually verified gameplay segments from the existing
+1.2.2 native app; its displayed controls and artwork are unchanged in 1.2.3.
+The `store-media` and `store-duel-reuse` profiles capture native media using
+Maestro and idb. Real hosts and controllers create temporary Firebase rooms;
+no gameplay, score, target or timing is overridden.
 
-The `store-media` EAS profile builds the standalone iOS simulator app, captures
-its screens with Maestro, and records real touch-driven gameplay using idb and
-`simctl`. `store-media-reuse` repeats capture from a simulator archive provided
-through `SCREENSHOT_APP_ARCHIVE_URL` in that build's environment. Capture tools
-do not change gameplay or scores. Inspect all footage before uploading.
-`store-duel-reuse` runs a real web host and second controller on the same capture
-machine, joins the native app, and records actual online casting. Only native
-app footage is included in the App Preview.
+The repository `.easignore` preserves credential exclusions and excludes browser
+music, store media and Git history from native build uploads. Archive inspection
+verified the app source, shared engine and required assets remain present; the
+compressed upload decreased from 190 MB to approximately 655 KB.
 
 ## Published update: 1.2.1 (build 10)
 

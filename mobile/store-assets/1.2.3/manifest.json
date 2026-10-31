@@ -12,7 +12,7 @@
   ],
   "productionBuild": null,
   "productionBuildNumber": null,
-  "releaseStatus": "Owner chose to wait for the free Expo iOS build allowance reset on November 1, 2026; no 1.2.3 binary uploaded or review submitted",
+  "releaseStatus": "One-time free-plan release attempt prepared for November 1, 2026 at 03:10 Europe/Istanbul; not submitted",
   "screenshots": [
     {
       "file": "../1.2.2/122-01-spells-in-action.png",
@@ -90,7 +90,7 @@
     ],
     "multiplayerOverlay": "Challenge a friend / Online wizard duel / First correct spell wins the point. / Two phones. One game screen."
   },
-  "reservedBuildNumber": "12",
+  "reservedBuildNumber": "13",
   "validation": {
     "lint": "passed",
     "typecheck": "passed",
@@ -100,11 +100,11 @@
   },
   "appStoreDelivery": {
     "versionId": "a93ce427-2ce9-41e1-ad8f-964557f2f3dc",
-    "checkedAt": "2026-10-30T22:15:31.667Z",
+    "checkedAt": "2026-10-31T21:53:08.101Z",
     "screenshots": "7 COMPLETE",
     "previewId": "67c00019-6358-8748-810b-b5c265978ce5",
     "previewUploadState": "COMPLETE",
-    "previewVideoState": "PROCESSING",
+    "previewVideoState": "COMPLETE",
     "posterTimeCode": "00:00:09:06",
     "posterState": "COMPLETE"
   }
