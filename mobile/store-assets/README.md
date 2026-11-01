@@ -22,7 +22,7 @@ without errors. [The manifest](1.2.3/manifest.json) records checksums, exact cut
 and provenance. No game state, score, target or timing was overridden.
 
 Seven screenshots and the video are uploaded to the editable 1.2.3 version.
-Publication is blocked by the Expo build allowance; see [APP-STORE.md](../APP-STORE.md)
+Version 1.2.3 has been submitted for Apple review; see [APP-STORE.md](../APP-STORE.md)
 for current processing and submission status.
 
 ## Version 1.2.2 screenshots and gameplay preview (October 30, 2026)

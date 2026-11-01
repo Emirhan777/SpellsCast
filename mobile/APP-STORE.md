@@ -1,52 +1,19 @@
 # App Store release preparation
 
-## Multiplayer preview update: 1.2.3 (retry prepared, November 1, 2026)
+## Submitted update: 1.2.3 (build 14)
 
-Version 1.2.2 (11) is live with six refreshed screenshots and the original
-23-second native on-device preview. Version 1.2.3 adds a multiplayer screenshot,
-a 28-second preview with a brief native online-duel ending, and the casting
-navigation fix described below.
+Apple status: **WAITING_FOR_REVIEW**. Review submission: `453a6dba-accd-4696-8012-ba6db3026665`.
+Submitted 2026-11-01T00:35:55.678Z; release is automatic after Apple approval.
 
-All seven screenshots, the video and its cover are COMPLETE in App Store
-Connect, with no reported processing errors. The cover is `00:00:09:06`.
-The editable version is `a93ce427-2ce9-41e1-ad8f-964557f2f3dc`, configured for
-automatic release after approval. **1.2.3 has not been submitted or published.**
+- Production build: `385e2a69-824f-4426-97cf-aba7c7e49c2a`; source commit `6000e8aea164d5b949e0245964f6beead65acb60`.
+- Signed IPA verified for version 1.2.3, build 14, bundle `com.emirhansimsek.spellscast` and landscape support. Apple processed the exact build as VALID.
+- Native verification `57742e8c-9a2b-446d-9b16-b845484c701c` opened an invitation, connected two players and cast 20 real runes. The controller remained visible.
+- Seven screenshots, the 28-second gameplay preview and its cover are complete in App Store Connect.
+- Lint, typecheck and offline game bundle consistency passed. Promotional text remains **Turn your phone to a magic wand**.
 
-At 00:53 Istanbul on November 1, EAS still reported an exhausted free allowance
-with two hours until its reset. The reset is expected at about 03:00 Istanbul
-(00:00 UTC). The owner chose to wait without upgrading, then requested
-publication again. Build number 13 is reserved remotely, but no valid 1.2.3
-binary has been delivered to Apple. The next production build may be build 14.
+The release disables iOS swipe-back on the wand page so horizontal casting strokes do not dismiss an invited controller. The preview focuses on on-device play with a brief native multiplayer view.
 
-A one-time local release runner is prepared for **November 1 at 03:10 Istanbul**.
-The Windows task is named `SpellsCast-1.2.3-Publish-20261101`; verify its registered
-state in Task Scheduler. Progress is recorded outside this repository in
-`../.verification/release123-runner-state.json` and `release123-runner.log`.
-The computer must be powered on, connected and the owner logged in. A missed
-trigger can start when available, but the runner expires on November 2.
-
-The job verifies the exact committed source and media, builds the `verify-invite`
-simulator profile and checks that 20 real casts leave the invited controller
-visible. Only after that passes does it build production, verify the signed IPA,
-upload it, wait for Apple's VALID state and submit the exact build for automatic
-release after approval. It stops on failures or changed source. It never upgrades
-the Expo plan. This is a prepared attempt, not publication confirmation.
-
-Capture QA found sideways strokes could invoke iOS back navigation on a
-controller opened through an invitation. The index route now disables that
-navigation gesture. The `verify-invite` workflow will verify this in a new native
-build before submission. Lint, TypeScript and offline bundle consistency pass.
-
-The final media uses visually verified gameplay segments from the existing
-1.2.2 native app; its displayed controls and artwork are unchanged in 1.2.3.
-The `store-media` and `store-duel-reuse` profiles capture native media using
-Maestro and idb. Real hosts and controllers create temporary Firebase rooms;
-no gameplay, score, target or timing is overridden.
-
-The repository `.easignore` preserves credential exclusions and excludes browser
-music, store media and Git history from native build uploads. Archive inspection
-verified the app source, shared engine and required assets remain present; the
-compressed upload decreased from 190 MB to approximately 655 KB.
+The free Expo allowance reset was used; no paid plan was activated. The one-time local release job has completed. Version 1.2.2 remains live until Apple approves this update.
 
 ## Published update: 1.2.1 (build 10)
 

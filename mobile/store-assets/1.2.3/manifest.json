@@ -10,9 +10,9 @@
     "4fb64238-69bb-4d47-a0f3-a90f2afe43cd",
     "67876606-b9eb-476e-9f4a-7486c65bdad1"
   ],
-  "productionBuild": null,
-  "productionBuildNumber": null,
-  "releaseStatus": "One-time free-plan release attempt prepared for November 1, 2026 at 03:10 Europe/Istanbul; not submitted",
+  "productionBuild": "385e2a69-824f-4426-97cf-aba7c7e49c2a",
+  "productionBuildNumber": "14",
+  "releaseStatus": "Submitted for Apple review; automatic release after approval",
   "screenshots": [
     {
       "file": "../1.2.2/122-01-spells-in-action.png",
@@ -90,22 +90,23 @@
     ],
     "multiplayerOverlay": "Challenge a friend / Online wizard duel / First correct spell wins the point. / Two phones. One game screen."
   },
-  "reservedBuildNumber": "13",
   "validation": {
     "lint": "passed",
     "typecheck": "passed",
     "offlineBundleConsistency": "passed",
     "previewFullDecode": "passed",
-    "invitationSwipeFixNativeRetest": "pending new native build"
+    "invitationSwipeFixNativeRetest": "passed: 57742e8c-9a2b-446d-9b16-b845484c701c"
   },
   "appStoreDelivery": {
     "versionId": "a93ce427-2ce9-41e1-ad8f-964557f2f3dc",
-    "checkedAt": "2026-10-31T21:53:08.101Z",
+    "checkedAt": "2026-11-01T00:35:55.675Z",
     "screenshots": "7 COMPLETE",
     "previewId": "67c00019-6358-8748-810b-b5c265978ce5",
     "previewUploadState": "COMPLETE",
     "previewVideoState": "COMPLETE",
     "posterTimeCode": "00:00:09:06",
-    "posterState": "COMPLETE"
+    "posterState": "COMPLETE",
+    "reviewSubmission": "453a6dba-accd-4696-8012-ba6db3026665",
+    "versionState": "WAITING_FOR_REVIEW"
   }
 }
